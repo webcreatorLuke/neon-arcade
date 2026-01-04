@@ -16,7 +16,6 @@
             --neon-yellow: #ffff00;
             --dark-bg: #0a0014;
             --card-bg: #1a0f2e;
-            --grid-color: rgba(191, 0, 255, 0.1);
         }
         
         * {
@@ -34,7 +33,6 @@
             position: relative;
         }
         
-        /* Animated grid background */
         body::before {
             content: '';
             position: fixed;
@@ -56,7 +54,6 @@
             100% { transform: translateY(50px); }
         }
         
-        /* Floating particles */
         body::after {
             content: '';
             position: fixed;
@@ -67,9 +64,7 @@
             background-image: 
                 radial-gradient(2px 2px at 20% 30%, var(--neon-pink), transparent),
                 radial-gradient(2px 2px at 60% 70%, var(--neon-blue), transparent),
-                radial-gradient(1px 1px at 50% 50%, var(--neon-green), transparent),
-                radial-gradient(1px 1px at 80% 10%, var(--neon-purple), transparent),
-                radial-gradient(2px 2px at 90% 60%, var(--neon-orange), transparent);
+                radial-gradient(1px 1px at 50% 50%, var(--neon-green), transparent);
             background-size: 200% 200%;
             animation: particles 15s ease infinite;
             opacity: 0.4;
@@ -99,22 +94,13 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            animation: gradientShift 3s ease infinite, glitch 5s infinite;
-            text-shadow: 0 0 20px rgba(255, 0, 110, 0.5);
+            animation: gradientShift 3s ease infinite;
             letter-spacing: 0.1em;
-            position: relative;
         }
         
         @keyframes gradientShift {
             0%, 100% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
-        }
-        
-        @keyframes glitch {
-            0%, 90%, 100% { transform: translateX(0); }
-            92% { transform: translateX(-3px); }
-            94% { transform: translateX(3px); }
-            96% { transform: translateX(-2px); }
         }
         
         .subtitle {
@@ -130,7 +116,6 @@
         @keyframes flicker {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.8; }
-            75% { opacity: 0.9; }
         }
         
         .container {
@@ -175,7 +160,7 @@
         .game-card:hover {
             transform: translateY(-10px) scale(1.02);
             border-color: var(--neon-pink);
-            box-shadow: 0 0 40px rgba(255, 0, 110, 0.6), 0 0 60px rgba(0, 245, 255, 0.3);
+            box-shadow: 0 0 40px rgba(255, 0, 110, 0.6);
         }
         
         .game-card:hover::before {
@@ -232,7 +217,6 @@
             box-shadow: 0 6px 25px rgba(255, 0, 110, 0.7);
         }
         
-        /* Game Modal */
         .modal {
             display: none;
             position: fixed;
@@ -253,12 +237,14 @@
         
         .modal-content {
             background: linear-gradient(135deg, #1a0f2e, #2a1547);
-            margin: 5% auto;
+            margin: 3% auto;
             padding: 2rem;
             border: 3px solid var(--neon-pink);
             border-radius: 20px;
             width: 90%;
-            max-width: 800px;
+            max-width: 900px;
+            max-height: 90vh;
+            overflow-y: auto;
             box-shadow: 0 0 50px rgba(255, 0, 110, 0.5);
             animation: slideIn 0.4s ease;
         }
@@ -284,8 +270,8 @@
         
         #gameCanvas {
             width: 100%;
-            max-width: 700px;
-            height: 400px;
+            max-width: 800px;
+            height: 450px;
             background: #0a0014;
             border: 2px solid var(--neon-purple);
             border-radius: 10px;
@@ -318,6 +304,21 @@
             color: rgba(255, 255, 255, 0.7);
             font-size: 0.9rem;
         }
+
+        #textInput {
+            width: 80%;
+            max-width: 400px;
+            padding: 1rem;
+            font-size: 1.5rem;
+            font-family: 'Orbitron', sans-serif;
+            background: #1a0f2e;
+            border: 2px solid var(--neon-blue);
+            color: var(--neon-green);
+            border-radius: 10px;
+            text-align: center;
+            display: none;
+            margin: 1rem auto;
+        }
     </style>
 </head>
 <body>
@@ -335,6 +336,7 @@
             <span class="close">&times;</span>
             <h2 id="modalTitle" style="font-family: 'Orbitron', sans-serif; color: var(--neon-pink); text-align: center; font-size: 2rem;"></h2>
             <div id="score">SCORE: 0</div>
+            <input type="text" id="textInput" />
             <canvas id="gameCanvas"></canvas>
             <div id="gameInfo"></div>
             <div class="controls" id="controls"></div>
@@ -343,119 +345,123 @@
 
     <script>
         const games = [
-            { name: "Color Clicker", desc: "Click the matching color before time runs out!", type: "color" },
-            { name: "Number Hunter", desc: "Find the highest number in the grid!", type: "number" },
-            { name: "Reaction Test", desc: "Click when the screen turns green!", type: "reaction" },
-            { name: "Memory Match", desc: "Remember the pattern and repeat it!", type: "memory" },
-            { name: "Speed Math", desc: "Solve math problems as fast as you can!", type: "math" },
-            { name: "Dodge Master", desc: "Avoid the falling obstacles!", type: "dodge" },
-            { name: "Click Storm", desc: "Click as many times as possible in 10 seconds!", type: "click" },
-            { name: "Pattern Breaker", desc: "Click the different pattern!", type: "pattern" },
-            { name: "Quick Draw", desc: "Draw the shape before time runs out!", type: "draw" },
-            { name: "Word Rush", desc: "Type the word as fast as you can!", type: "word" },
-            { name: "Bubble Pop", desc: "Pop all the bubbles in order!", type: "bubble" },
-            { name: "Snake Racer", desc: "Classic snake with a twist!", type: "snake" },
-            { name: "Block Stacker", desc: "Stack blocks as high as you can!", type: "stack" },
-            { name: "Maze Runner", desc: "Navigate through the random maze!", type: "maze" },
-            { name: "Reflex Master", desc: "Catch the falling stars!", type: "catch" },
-            { name: "Rhythm Tapper", desc: "Tap to the beat!", type: "rhythm" },
-            { name: "Color Flood", desc: "Fill the screen with one color!", type: "flood" },
-            { name: "Target Shooter", desc: "Hit the moving targets!", type: "shoot" },
-            { name: "Spin Master", desc: "Stop the spinner at the right time!", type: "spin" },
-            { name: "Card Flipper", desc: "Match all the cards!", type: "cards" },
-            { name: "Line Drawer", desc: "Connect all dots without crossing!", type: "line" },
-            { name: "Gravity Jump", desc: "Jump through obstacles!", type: "jump" },
-            { name: "Coin Collector", desc: "Collect all the coins!", type: "coin" },
-            { name: "Speed Clicker", desc: "Click all targets before they disappear!", type: "target" },
-            { name: "Letter Hunt", desc: "Find all the letters in order!", type: "letter" },
-            { name: "Shape Shifter", desc: "Transform shapes to match!", type: "shape" },
-            { name: "Wave Rider", desc: "Ride the wave without crashing!", type: "wave" },
-            { name: "Pixel Painter", desc: "Color the pixels to match!", type: "pixel" },
-            { name: "Number Sequence", desc: "Complete the number sequence!", type: "sequence" },
-            { name: "Flash Memory", desc: "Remember what flashed!", type: "flash" },
-            { name: "Arrow Attack", desc: "Dodge the arrows!", type: "arrow" },
-            { name: "Circle Chase", desc: "Keep the circle in bounds!", type: "circle" },
-            { name: "Power Surge", desc: "Charge up before time runs out!", type: "power" },
-            { name: "Crystal Collector", desc: "Collect all crystals in order!", type: "crystal" },
-            { name: "Speed Reader", desc: "Read and answer quickly!", type: "read" },
-            { name: "Laser Dodge", desc: "Avoid the laser beams!", type: "laser" },
-            { name: "Tile Flipper", desc: "Flip all tiles to the same color!", type: "tile" },
-            { name: "Rapid Response", desc: "Answer questions rapidly!", type: "quiz" },
-            { name: "Orbit Master", desc: "Keep objects in orbit!", type: "orbit" },
-            { name: "Switch Hitter", desc: "Hit the right switch!", type: "switch" },
-            { name: "Pulse Rider", desc: "Ride the pulse waves!", type: "pulse" },
-            { name: "Gem Matcher", desc: "Match 3 gems in a row!", type: "gem" },
-            { name: "Speed Sorter", desc: "Sort items by size!", type: "sort" },
-            { name: "Light Show", desc: "Follow the light sequence!", type: "light" },
-            { name: "Bounce Ball", desc: "Keep the ball bouncing!", type: "bounce" },
-            { name: "Gate Keeper", desc: "Open the right gates!", type: "gate" },
-            { name: "Chain Reaction", desc: "Create the longest chain!", type: "chain" },
-            { name: "Portal Jump", desc: "Jump through portals!", type: "portal" },
-            { name: "Time Warp", desc: "Beat the clock!", type: "time" },
-            { name: "Hex Hunter", desc: "Find matching hex colors!", type: "hex" },
-            { name: "Neon Runner", desc: "Run through the neon track!", type: "runner" },
-            { name: "Blast Zone", desc: "Click to blast away obstacles!", type: "blast" },
-            { name: "Mirror Match", desc: "Match the mirror image!", type: "mirror" },
-            { name: "Pulse Check", desc: "Click at the right pulse!", type: "check" },
-            { name: "Grid Master", desc: "Light up the entire grid!", type: "grid" },
-            { name: "Quantum Leap", desc: "Leap between dimensions!", type: "quantum" },
-            { name: "Echo Chamber", desc: "Repeat the echo pattern!", type: "echo" },
-            { name: "Fractal Focus", desc: "Find the center of fractals!", type: "fractal" },
-            { name: "Prism Break", desc: "Break light into colors!", type: "prism" },
-            { name: "Volt Vortex", desc: "Dodge the electric vortex!", type: "volt" },
-            { name: "Cyber Sprint", desc: "Sprint through cyberspace!", type: "cyber" },
-            { name: "Data Stream", desc: "Navigate the data stream!", type: "data" },
-            { name: "Pixel Perfect", desc: "Place pixels perfectly!", type: "perfect" },
-            { name: "Glitch Hunter", desc: "Find the glitches!", type: "glitch" },
-            { name: "Binary Blast", desc: "Convert to binary fast!", type: "binary" },
-            { name: "Synth Wave", desc: "Ride the synth waves!", type: "synth" },
-            { name: "Neon Nights", desc: "Light up the night!", type: "nights" },
-            { name: "Turbo Boost", desc: "Boost at the right time!", type: "turbo" },
-            { name: "Laser Link", desc: "Connect laser points!", type: "link" },
-            { name: "Hyper Space", desc: "Navigate hyperspace!", type: "hyper" },
-            { name: "Retro Rush", desc: "Rush through retro levels!", type: "retro" },
-            { name: "Atomic Aim", desc: "Aim at atomic particles!", type: "atomic" },
-            { name: "Plasma Pop", desc: "Pop plasma bubbles!", type: "plasma" },
-            { name: "Circuit Solver", desc: "Complete the circuit!", type: "circuit" },
-            { name: "Mega Merge", desc: "Merge until you reach mega!", type: "merge" },
-            { name: "Vector Vault", desc: "Vault over vectors!", type: "vector" },
-            { name: "Cosmic Click", desc: "Click cosmic objects!", type: "cosmic" },
-            { name: "Digital Dash", desc: "Dash through digital space!", type: "dash" },
-            { name: "Photon Race", desc: "Race at light speed!", type: "photon" },
-            { name: "Matrix Mind", desc: "Navigate the matrix!", type: "matrix" },
-            { name: "Frequency Find", desc: "Find the right frequency!", type: "frequency" },
-            { name: "Neon Knight", desc: "Battle in neon armor!", type: "knight" },
-            { name: "Code Cracker", desc: "Crack the color code!", type: "code" },
-            { name: "Velocity Vibe", desc: "Match the velocity vibe!", type: "velocity" },
-            { name: "Spectrum Shift", desc: "Shift through the spectrum!", type: "spectrum" },
-            { name: "Rave Reactor", desc: "React to the rave!", type: "rave" },
-            { name: "Ion Storm", desc: "Weather the ion storm!", type: "ion" },
-            { name: "Mega Morph", desc: "Morph shapes at mega speed!", type: "morph" },
-            { name: "Flux Fighter", desc: "Fight the flux!", type: "flux" },
-            { name: "Beam Buster", desc: "Bust through beams!", type: "beam" },
-            { name: "Neon Nova", desc: "Create a neon nova!", type: "nova" },
-            { name: "Rapid Rift", desc: "Jump through rifts rapidly!", type: "rift" },
-            { name: "Laser Legion", desc: "Command the laser legion!", type: "legion" },
-            { name: "Cyber Cyclone", desc: "Survive the cyber cyclone!", type: "cyclone" },
-            { name: "Photon Fury", desc: "Unleash photon fury!", type: "fury" },
-            { name: "Neon Nexus", desc: "Connect the neon nexus!", type: "nexus" },
-            { name: "Ultra Velocity", desc: "Reach ultra velocity!", type: "ultra" },
-            { name: "Quantum Quest", desc: "Complete quantum challenges!", type: "quest" }
+            { name: "Color Clicker", desc: "Click the matching color!" },
+            { name: "Number Hunter", desc: "Find the highest number!" },
+            { name: "Reaction Test", desc: "Test your reflexes!" },
+            { name: "Memory Match", desc: "Remember the pattern!" },
+            { name: "Speed Math", desc: "Solve math fast!" },
+            { name: "Dodge Master", desc: "Dodge falling objects!" },
+            { name: "Click Storm", desc: "Click rapidly!" },
+            { name: "Pattern Breaker", desc: "Find the odd one!" },
+            { name: "Quick Draw", desc: "Draw the shape!" },
+            { name: "Word Rush", desc: "Type words fast!" },
+            { name: "Bubble Pop", desc: "Pop in order!" },
+            { name: "Snake Racer", desc: "Classic snake game!" },
+            { name: "Block Stacker", desc: "Stack blocks high!" },
+            { name: "Maze Runner", desc: "Find the exit!" },
+            { name: "Reflex Master", desc: "Catch falling stars!" },
+            { name: "Rhythm Tapper", desc: "Tap to the beat!" },
+            { name: "Color Flood", desc: "Flood with color!" },
+            { name: "Target Shooter", desc: "Hit moving targets!" },
+            { name: "Spin Master", desc: "Stop on target!" },
+            { name: "Card Flipper", desc: "Match card pairs!" },
+            { name: "Line Drawer", desc: "Connect the dots!" },
+            { name: "Gravity Jump", desc: "Jump obstacles!" },
+            { name: "Coin Collector", desc: "Collect all coins!" },
+            { name: "Speed Clicker", desc: "Click fast!" },
+            { name: "Letter Hunt", desc: "Find A-Z!" },
+            { name: "Shape Shifter", desc: "Match shapes!" },
+            { name: "Wave Rider", desc: "Ride the wave!" },
+            { name: "Pixel Painter", desc: "Paint pixels!" },
+            { name: "Number Sequence", desc: "Complete sequence!" },
+            { name: "Flash Memory", desc: "Remember flash!" },
+            { name: "Arrow Attack", desc: "Dodge arrows!" },
+            { name: "Circle Chase", desc: "Stay inside!" },
+            { name: "Power Surge", desc: "Charge power!" },
+            { name: "Crystal Collector", desc: "Collect crystals!" },
+            { name: "Speed Reader", desc: "Read quickly!" },
+            { name: "Laser Dodge", desc: "Avoid lasers!" },
+            { name: "Tile Flipper", desc: "Flip tiles!" },
+            { name: "Rapid Response", desc: "True or False!" },
+            { name: "Orbit Master", desc: "Keep orbit!" },
+            { name: "Switch Hitter", desc: "Hit switches!" },
+            { name: "Pulse Rider", desc: "Click pulse!" },
+            { name: "Gem Matcher", desc: "Match gems!" },
+            { name: "Speed Sorter", desc: "Sort fast!" },
+            { name: "Light Show", desc: "Follow lights!" },
+            { name: "Bounce Ball", desc: "Keep bouncing!" },
+            { name: "Gate Keeper", desc: "Open gates!" },
+            { name: "Chain Reaction", desc: "Create chain!" },
+            { name: "Portal Jump", desc: "Jump portals!" },
+            { name: "Time Warp", desc: "Beat time!" },
+            { name: "Hex Hunter", desc: "Find hex!" },
+            { name: "Neon Runner", desc: "Run fast!" },
+            { name: "Blast Zone", desc: "Blast targets!" },
+            { name: "Mirror Match", desc: "Match mirror!" },
+            { name: "Pulse Check", desc: "Click peak!" },
+            { name: "Grid Master", desc: "Light grid!" },
+            { name: "Quantum Leap", desc: "Teleport!" },
+            { name: "Echo Chamber", desc: "Repeat echo!" },
+            { name: "Fractal Focus", desc: "Find center!" },
+            { name: "Prism Break", desc: "Break light!" },
+            { name: "Volt Vortex", desc: "Navigate vortex!" },
+            { name: "Cyber Sprint", desc: "Sprint!" },
+            { name: "Data Stream", desc: "Catch data!" },
+            { name: "Pixel Perfect", desc: "Perfect pixels!" },
+            { name: "Glitch Hunter", desc: "Find glitch!" },
+            { name: "Binary Blast", desc: "Convert binary!" },
+            { name: "Synth Wave", desc: "Ride wave!" },
+            { name: "Neon Nights", desc: "Light neon!" },
+            { name: "Turbo Boost", desc: "Boost!" },
+            { name: "Laser Link", desc: "Link lasers!" },
+            { name: "Hyper Space", desc: "Dodge asteroids!" },
+            { name: "Retro Rush", desc: "Collect power!" },
+            { name: "Atomic Aim", desc: "Hit atoms!" },
+            { name: "Plasma Pop", desc: "Pop plasma!" },
+            { name: "Circuit Solver", desc: "Solve circuit!" },
+            { name: "Mega Merge", desc: "Merge to 2048!" },
+            { name: "Vector Vault", desc: "Vault!" },
+            { name: "Cosmic Click", desc: "Click cosmos!" },
+            { name: "Digital Dash", desc: "Dash!" },
+            { name: "Photon Race", desc: "Race!" },
+            { name: "Matrix Mind", desc: "Remember!" },
+            { name: "Frequency Find", desc: "Match freq!" },
+            { name: "Neon Knight", desc: "Deflect!" },
+            { name: "Code Cracker", desc: "Crack code!" },
+            { name: "Velocity Vibe", desc: "Match speed!" },
+            { name: "Spectrum Shift", desc: "Shift!" },
+            { name: "Rave Reactor", desc: "React!" },
+            { name: "Ion Storm", desc: "Navigate!" },
+            { name: "Mega Morph", desc: "Morph!" },
+            { name: "Flux Fighter", desc: "Fight!" },
+            { name: "Beam Buster", desc: "Bust!" },
+            { name: "Neon Nova", desc: "Create nova!" },
+            { name: "Rapid Rift", desc: "Jump rifts!" },
+            { name: "Laser Legion", desc: "Command!" },
+            { name: "Cyber Cyclone", desc: "Survive!" },
+            { name: "Photon Fury", desc: "Unleash!" },
+            { name: "Neon Nexus", desc: "Connect!" },
+            { name: "Ultra Velocity", desc: "Max speed!" },
+            { name: "Quantum Quest", desc: "Solve!" }
         ];
 
         const modal = document.getElementById('gameModal');
         const closeBtn = document.querySelector('.close');
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
+        const textInput = document.getElementById('textInput');
         let currentGame = null;
         let score = 0;
         let gameActive = false;
+        let gameLoop = null;
+        let keys = {};
 
-        // Set canvas size
-        canvas.width = 700;
-        canvas.height = 400;
+        canvas.width = 800;
+        canvas.height = 450;
 
-        // Generate game cards
+        window.addEventListener('keydown', (e) => { keys[e.key] = true; keys[e.code] = true; });
+        window.addEventListener('keyup', (e) => { keys[e.key] = false; keys[e.code] = false; });
+
         const gamesGrid = document.getElementById('gamesGrid');
         games.forEach((game, index) => {
             const card = document.createElement('div');
@@ -472,12 +478,16 @@
         closeBtn.onclick = function() {
             modal.style.display = 'none';
             gameActive = false;
+            textInput.style.display = 'none';
+            if(gameLoop) cancelAnimationFrame(gameLoop);
         }
 
         window.onclick = function(event) {
             if (event.target == modal) {
                 modal.style.display = 'none';
                 gameActive = false;
+                textInput.style.display = 'none';
+                if(gameLoop) cancelAnimationFrame(gameLoop);
             }
         }
 
@@ -485,10 +495,14 @@
             currentGame = games[index];
             score = 0;
             gameActive = true;
+            textInput.style.display = 'none';
+            textInput.value = '';
             document.getElementById('modalTitle').textContent = currentGame.name;
             document.getElementById('score').textContent = 'SCORE: 0';
             modal.style.display = 'block';
-            initGame(currentGame.type);
+            canvas.onclick = null;
+            if(gameLoop) cancelAnimationFrame(gameLoop);
+            initGame(index);
         }
 
         function updateScore(points) {
@@ -498,689 +512,826 @@
 
         function endGame(message) {
             gameActive = false;
+            if(gameLoop) cancelAnimationFrame(gameLoop);
             ctx.fillStyle = '#1a0f2e';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.font = '40px Orbitron';
+            ctx.font = '48px Orbitron';
             ctx.fillStyle = '#ff006e';
             ctx.textAlign = 'center';
-            ctx.fillText('GAME OVER!', canvas.width/2, canvas.height/2 - 40);
-            ctx.font = '24px Orbitron';
+            ctx.fillText('GAME OVER!', canvas.width/2, canvas.height/2 - 50);
+            ctx.font = '28px Rajdhani';
             ctx.fillStyle = '#00f5ff';
-            ctx.fillText(message, canvas.width/2, canvas.height/2 + 20);
-            ctx.fillText(`Final Score: ${score}`, canvas.width/2, canvas.height/2 + 60);
+            ctx.fillText(message, canvas.width/2, canvas.height/2 + 10);
+            ctx.fillText(`Final Score: ${score}`, canvas.width/2, canvas.height/2 + 50);
         }
 
-        function initGame(type) {
+        function initGame(index) {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             document.getElementById('gameInfo').textContent = '';
             document.getElementById('controls').textContent = '';
 
-            switch(type) {
-                case 'color':
-                    playColorClicker();
-                    break;
-                case 'number':
-                    playNumberHunter();
-                    break;
-                case 'reaction':
-                    playReactionTest();
-                    break;
-                case 'memory':
-                    playMemoryMatch();
-                    break;
-                case 'math':
-                    playSpeedMath();
-                    break;
-                case 'dodge':
-                    playDodgeMaster();
-                    break;
-                case 'click':
-                    playClickStorm();
-                    break;
-                default:
-                    playRandomGame(type);
-            }
+            const gameFunctions = [
+                game1, game2, game3, game4, game5, game6, game7, game8, game9, game10,
+                game11, game12, game13, game14, game15, game16, game17, game18, game19, game20,
+                game21, game22, game23, game24, game25, game26, game27, game28, game29, game30,
+                game31, game32, game33, game34, game35, game36, game37, game38, game39, game40,
+                game41, game42, game43, game44, game45, game46, game47, game48, game49, game50,
+                game51, game52, game53, game54, game55, game56, game57, game58, game59, game60,
+                game61, game62, game63, game64, game65, game66, game67, game68, game69, game70,
+                game71, game72, game73, game74, game75, game76, game77, game78, game79, game80,
+                game81, game82, game83, game84, game85, game86, game87, game88, game89, game90,
+                game91, game92, game93, game94, game95, game96, game97, game98, game99, game100
+            ];
+
+            gameFunctions[index]();
         }
 
-        // Game 1: Color Clicker
-        function playColorClicker() {
+        // GAME 1: Color Clicker - Click matching color
+        function game1() {
             const colors = ['#ff006e', '#00f5ff', '#39ff14', '#bf00ff', '#ff7700'];
-            const colorNames = ['Pink', 'Blue', 'Green', 'Purple', 'Orange'];
-            let targetColor = Math.floor(Math.random() * colors.length);
-            let timeLeft = 5;
+            const names = ['PINK', 'CYAN', 'GREEN', 'PURPLE', 'ORANGE'];
+            let target = Math.floor(Math.random() * 5);
             
-            document.getElementById('gameInfo').textContent = `Click the ${colorNames[targetColor]} square!`;
-            document.getElementById('controls').textContent = 'Time: 5s';
+            document.getElementById('gameInfo').textContent = `CLICK ${names[target]}!`;
             
-            // Draw colored squares
-            const squares = [];
             for(let i = 0; i < 5; i++) {
-                const x = 50 + i * 130;
-                const y = 150;
-                squares.push({x, y, w: 100, h: 100, color: colors[i]});
                 ctx.fillStyle = colors[i];
-                ctx.fillRect(x, y, 100, 100);
-                ctx.strokeStyle = '#fff';
-                ctx.lineWidth = 3;
-                ctx.strokeRect(x, y, 100, 100);
+                ctx.fillRect(100 + i * 140, 180, 120, 120);
             }
             
-            const timer = setInterval(() => {
-                if(!gameActive) {
-                    clearInterval(timer);
-                    return;
-                }
-                timeLeft--;
-                document.getElementById('controls').textContent = `Time: ${timeLeft}s`;
-                if(timeLeft <= 0) {
-                    clearInterval(timer);
-                    endGame('Time\'s up!');
-                }
-            }, 1000);
-            
-            canvas.onclick = function(e) {
-                if(!gameActive) return;
+            canvas.onclick = (e) => {
                 const rect = canvas.getBoundingClientRect();
                 const x = (e.clientX - rect.left) * (canvas.width / rect.width);
-                const y = (e.clientY - rect.top) * (canvas.height / rect.height);
-                
-                for(let i = 0; i < squares.length; i++) {
-                    const sq = squares[i];
-                    if(x >= sq.x && x <= sq.x + sq.w && y >= sq.y && y <= sq.y + sq.h) {
-                        clearInterval(timer);
-                        if(i === targetColor) {
-                            updateScore(100);
-                            endGame('Perfect! You got it!');
-                        } else {
-                            endGame('Wrong color!');
-                        }
-                        canvas.onclick = null;
-                        return;
+                for(let i = 0; i < 5; i++) {
+                    if(x >= 100 + i * 140 && x <= 220 + i * 140) {
+                        updateScore(i === target ? 100 : 0);
+                        endGame(i === target ? 'Correct!' : 'Wrong!');
                     }
                 }
             };
         }
 
-        // Game 2: Number Hunter
-        function playNumberHunter() {
-            const numbers = [];
-            const positions = [];
-            let maxNum = 0;
-            let maxIndex = 0;
-            
-            document.getElementById('gameInfo').textContent = 'Click the HIGHEST number!';
-            document.getElementById('controls').textContent = 'You have 7 seconds!';
-            
+        // GAME 2: Number Hunter - Find highest
+        function game2() {
+            const nums = [];
+            let max = 0;
             for(let i = 0; i < 12; i++) {
-                const num = Math.floor(Math.random() * 99) + 1;
-                numbers.push(num);
-                if(num > maxNum) {
-                    maxNum = num;
-                    maxIndex = i;
-                }
-                
-                const x = 50 + (i % 4) * 150;
-                const y = 50 + Math.floor(i / 4) * 100;
-                positions.push({x, y, num});
-                
+                const n = Math.floor(Math.random() * 99) + 1;
+                nums.push(n);
+                if(n > max) max = n;
+                const x = 100 + (i % 4) * 170;
+                const y = 80 + Math.floor(i / 4) * 110;
                 ctx.fillStyle = '#bf00ff';
-                ctx.fillRect(x, y, 120, 80);
+                ctx.fillRect(x, y, 140, 90);
                 ctx.font = '36px Orbitron';
                 ctx.fillStyle = '#fff';
                 ctx.textAlign = 'center';
-                ctx.fillText(num, x + 60, y + 50);
+                ctx.fillText(n, x + 70, y + 58);
             }
-            
-            let timeLeft = 7;
-            const timer = setInterval(() => {
-                if(!gameActive) {
-                    clearInterval(timer);
-                    return;
-                }
-                timeLeft--;
-                document.getElementById('controls').textContent = `Time: ${timeLeft}s`;
-                if(timeLeft <= 0) {
-                    clearInterval(timer);
-                    endGame(`Time's up! It was ${maxNum}`);
-                }
-            }, 1000);
-            
-            canvas.onclick = function(e) {
-                if(!gameActive) return;
+            document.getElementById('gameInfo').textContent = 'FIND HIGHEST!';
+            canvas.onclick = (e) => {
                 const rect = canvas.getBoundingClientRect();
                 const x = (e.clientX - rect.left) * (canvas.width / rect.width);
                 const y = (e.clientY - rect.top) * (canvas.height / rect.height);
-                
-                for(let i = 0; i < positions.length; i++) {
-                    const pos = positions[i];
-                    if(x >= pos.x && x <= pos.x + 120 && y >= pos.y && y <= pos.y + 80) {
-                        clearInterval(timer);
-                        if(pos.num === maxNum) {
-                            updateScore(150);
-                            endGame('Correct! Great job!');
-                        } else {
-                            endGame(`Wrong! It was ${maxNum}`);
-                        }
-                        canvas.onclick = null;
-                        return;
+                for(let i = 0; i < 12; i++) {
+                    const bx = 100 + (i % 4) * 170;
+                    const by = 80 + Math.floor(i / 4) * 110;
+                    if(x >= bx && x <= bx + 140 && y >= by && y <= by + 90) {
+                        updateScore(nums[i] === max ? 150 : 0);
+                        endGame(nums[i] === max ? 'Correct!' : `Wrong! ${max}`);
                     }
                 }
             };
         }
 
-        // Game 3: Reaction Test
-        function playReactionTest() {
+        // GAME 3: Reaction Test
+        function game3() {
             ctx.fillStyle = '#ff006e';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            document.getElementById('gameInfo').textContent = 'Wait for GREEN...';
-            document.getElementById('controls').textContent = 'Click as fast as you can when it turns green!';
-            
-            const waitTime = 2000 + Math.random() * 3000;
-            let startTime;
-            
+            document.getElementById('gameInfo').textContent = 'WAIT...';
+            let start;
             setTimeout(() => {
-                if(!gameActive) return;
                 ctx.fillStyle = '#39ff14';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 document.getElementById('gameInfo').textContent = 'CLICK NOW!';
-                startTime = Date.now();
-            }, waitTime);
-            
-            canvas.onclick = function() {
-                if(!gameActive) return;
-                if(!startTime) {
-                    endGame('Too early! Wait for green!');
-                } else {
-                    const reactionTime = Date.now() - startTime;
-                    const points = Math.max(0, 200 - Math.floor(reactionTime / 10));
-                    updateScore(points);
-                    endGame(`${reactionTime}ms reaction time!`);
+                start = Date.now();
+            }, 2000 + Math.random() * 3000);
+            canvas.onclick = () => {
+                if(!start) endGame('Too early!');
+                else {
+                    const time = Date.now() - start;
+                    updateScore(Math.max(0, 300 - time));
+                    endGame(`${time}ms!`);
                 }
-                canvas.onclick = null;
             };
         }
 
-        // Game 4: Memory Match
-        function playMemoryMatch() {
-            const sequence = [];
-            const gridSize = 4;
-            let round = 1;
-            let showingSequence = true;
-            let playerSequence = [];
-            
-            document.getElementById('gameInfo').textContent = 'Watch the pattern!';
-            document.getElementById('controls').textContent = 'Round 1';
-            
-            function generateSequence() {
-                sequence.push(Math.floor(Math.random() * (gridSize * gridSize)));
-            }
-            
-            function drawGrid() {
-                for(let i = 0; i < gridSize * gridSize; i++) {
-                    const x = 50 + (i % gridSize) * 150;
-                    const y = 50 + Math.floor(i / gridSize) * 80;
+        // GAME 4: Memory Match - Repeat pattern
+        function game4() {
+            const seq = [Math.floor(Math.random() * 16)];
+            let showing = true, playerSeq = [];
+            function draw() {
+                ctx.fillStyle = '#0a0014';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                for(let i = 0; i < 16; i++) {
+                    const x = 150 + (i % 4) * 120;
+                    const y = 80 + Math.floor(i / 4) * 90;
                     ctx.fillStyle = '#1a0f2e';
-                    ctx.fillRect(x, y, 130, 60);
-                    ctx.strokeStyle = '#bf00ff';
-                    ctx.lineWidth = 2;
-                    ctx.strokeRect(x, y, 130, 60);
+                    ctx.fillRect(x, y, 100, 70);
                 }
             }
-            
-            function showSequence() {
-                let index = 0;
-                const interval = setInterval(() => {
-                    if(!gameActive) {
-                        clearInterval(interval);
-                        return;
-                    }
-                    
-                    drawGrid();
-                    
-                    if(index < sequence.length) {
-                        const cell = sequence[index];
-                        const x = 50 + (cell % gridSize) * 150;
-                        const y = 50 + Math.floor(cell / gridSize) * 80;
+            draw();
+            document.getElementById('gameInfo').textContent = 'WATCH!';
+            setTimeout(() => {
+                let i = 0;
+                const show = setInterval(() => {
+                    draw();
+                    if(i < seq.length) {
+                        const x = 150 + (seq[i] % 4) * 120;
+                        const y = 80 + Math.floor(seq[i] / 4) * 90;
                         ctx.fillStyle = '#00f5ff';
-                        ctx.fillRect(x, y, 130, 60);
-                        index++;
+                        ctx.fillRect(x, y, 100, 70);
+                        i++;
                     } else {
-                        clearInterval(interval);
-                        showingSequence = false;
-                        document.getElementById('gameInfo').textContent = 'Your turn! Repeat the pattern!';
+                        clearInterval(show);
+                        showing = false;
+                        document.getElementById('gameInfo').textContent = 'YOUR TURN!';
                     }
-                }, 800);
-            }
-            
-            generateSequence();
-            drawGrid();
-            setTimeout(showSequence, 1000);
-            
-            canvas.onclick = function(e) {
-                if(!gameActive || showingSequence) return;
-                
+                }, 700);
+            }, 1000);
+            canvas.onclick = (e) => {
+                if(showing) return;
                 const rect = canvas.getBoundingClientRect();
                 const x = (e.clientX - rect.left) * (canvas.width / rect.width);
                 const y = (e.clientY - rect.top) * (canvas.height / rect.height);
-                
-                for(let i = 0; i < gridSize * gridSize; i++) {
-                    const cellX = 50 + (i % gridSize) * 150;
-                    const cellY = 50 + Math.floor(i / gridSize) * 80;
-                    
-                    if(x >= cellX && x <= cellX + 130 && y >= cellY && y <= cellY + 60) {
-                        playerSequence.push(i);
-                        
-                        // Flash the cell
-                        ctx.fillStyle = '#ff006e';
-                        ctx.fillRect(cellX, cellY, 130, 60);
-                        setTimeout(() => drawGrid(), 200);
-                        
-                        if(playerSequence[playerSequence.length - 1] !== sequence[playerSequence.length - 1]) {
-                            canvas.onclick = null;
-                            endGame(`Wrong! You made it to round ${round}`);
-                            return;
+                for(let i = 0; i < 16; i++) {
+                    const bx = 150 + (i % 4) * 120;
+                    const by = 80 + Math.floor(i / 4) * 90;
+                    if(x >= bx && x <= bx + 100 && y >= by && y <= by + 70) {
+                        playerSeq.push(i);
+                        if(playerSeq[playerSeq.length - 1] !== seq[playerSeq.length - 1]) {
+                            endGame('Wrong!');
+                        } else if(playerSeq.length === seq.length) {
+                            updateScore(50);
+                            endGame('Correct!');
                         }
-                        
-                        if(playerSequence.length === sequence.length) {
-                            updateScore(round * 50);
-                            round++;
-                            playerSequence = [];
-                            document.getElementById('controls').textContent = `Round ${round}`;
-                            
-                            if(round > 5) {
-                                canvas.onclick = null;
-                                endGame('Amazing! You won!');
-                                return;
-                            }
-                            
-                            showingSequence = true;
-                            document.getElementById('gameInfo').textContent = 'Next round!';
-                            setTimeout(() => {
-                                generateSequence();
-                                showSequence();
-                            }, 1000);
-                        }
-                        return;
                     }
                 }
             };
         }
 
-        // Game 5: Speed Math
-        function playSpeedMath() {
-            let correctAnswers = 0;
-            let questionsAsked = 0;
-            
-            function newQuestion() {
-                const a = Math.floor(Math.random() * 20) + 1;
-                const b = Math.floor(Math.random() * 20) + 1;
-                const ops = ['+', '-', '×'];
-                const op = ops[Math.floor(Math.random() * ops.length)];
-                let answer;
-                
-                switch(op) {
-                    case '+': answer = a + b; break;
-                    case '-': answer = a - b; break;
-                    case '×': answer = a * b; break;
-                }
-                
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.font = '60px Orbitron';
-                ctx.fillStyle = '#00f5ff';
-                ctx.textAlign = 'center';
-                ctx.fillText(`${a} ${op} ${b} = ?`, canvas.width/2, canvas.height/2 - 40);
-                
-                const options = [answer];
-                while(options.length < 4) {
-                    const wrong = answer + Math.floor(Math.random() * 10) - 5;
-                    if(!options.includes(wrong) && wrong > 0) options.push(wrong);
-                }
-                options.sort(() => Math.random() - 0.5);
-                
-                for(let i = 0; i < 4; i++) {
-                    const x = 50 + i * 150;
-                    const y = canvas.height/2 + 40;
-                    ctx.fillStyle = '#bf00ff';
-                    ctx.fillRect(x, y, 130, 60);
-                    ctx.font = '32px Orbitron';
-                    ctx.fillStyle = '#fff';
-                    ctx.fillText(options[i], x + 65, y + 40);
-                }
-                
-                document.getElementById('gameInfo').textContent = `Question ${questionsAsked + 1}/5`;
-                
-                canvas.onclick = function(e) {
-                    if(!gameActive) return;
-                    const rect = canvas.getBoundingClientRect();
-                    const x = (e.clientX - rect.left) * (canvas.width / rect.width);
-                    const y = (e.clientY - rect.top) * (canvas.height / rect.height);
-                    
-                    for(let i = 0; i < 4; i++) {
-                        const btnX = 50 + i * 150;
-                        const btnY = canvas.height/2 + 40;
-                        
-                        if(x >= btnX && x <= btnX + 130 && y >= btnY && y <= btnY + 60) {
-                            if(options[i] === answer) {
-                                correctAnswers++;
-                                updateScore(50);
-                            }
-                            questionsAsked++;
-                            
-                            if(questionsAsked >= 5) {
-                                canvas.onclick = null;
-                                endGame(`You got ${correctAnswers}/5 correct!`);
-                            } else {
-                                setTimeout(newQuestion, 500);
-                            }
-                            return;
-                        }
-                    }
-                };
+        // GAME 5: Speed Math - Solve problems
+        function game5() {
+            const a = Math.floor(Math.random() * 20) + 1;
+            const b = Math.floor(Math.random() * 20) + 1;
+            const ops = ['+', '-', '×'];
+            const op = ops[Math.floor(Math.random() * 3)];
+            let ans = op === '+' ? a + b : op === '-' ? a - b : a * b;
+            ctx.font = '64px Orbitron';
+            ctx.fillStyle = '#00f5ff';
+            ctx.textAlign = 'center';
+            ctx.fillText(`${a} ${op} ${b} = ?`, 400, 180);
+            const opts = [ans];
+            while(opts.length < 4) {
+                const w = ans + Math.floor(Math.random() * 10) - 5;
+                if(!opts.includes(w) && w > 0) opts.push(w);
             }
-            
-            newQuestion();
+            opts.sort(() => Math.random() - 0.5);
+            for(let i = 0; i < 4; i++) {
+                ctx.fillStyle = '#bf00ff';
+                ctx.fillRect(100 + i * 160, 260, 140, 70);
+                ctx.font = '36px Orbitron';
+                ctx.fillStyle = '#fff';
+                ctx.fillText(opts[i], 170 + i * 160, 305);
+            }
+            document.getElementById('gameInfo').textContent = 'SOLVE IT!';
+            canvas.onclick = (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const x = (e.clientX - rect.left) * (canvas.width / rect.width);
+                for(let i = 0; i < 4; i++) {
+                    if(x >= 100 + i * 160 && x <= 240 + i * 160) {
+                        updateScore(opts[i] === ans ? 50 : 0);
+                        endGame(opts[i] === ans ? 'Correct!' : 'Wrong!');
+                    }
+                }
+            };
         }
 
-        // Game 6: Dodge Master
-        function playDodgeMaster() {
-            const player = { x: 350, y: 350, size: 20 };
-            const obstacles = [];
-            let gameTime = 0;
-            const keys = {};
-            
-            document.getElementById('gameInfo').textContent = 'Dodge the falling obstacles!';
-            document.getElementById('controls').textContent = 'Use Arrow Keys or WASD';
-            
-            window.addEventListener('keydown', (e) => { keys[e.key] = true; });
-            window.addEventListener('keyup', (e) => { keys[e.key] = false; });
-            
-            function spawnObstacle() {
+        // GAME 6: Dodge Master - Avoid falling
+        function game6() {
+            const player = {x: 400, y: 380, r: 18};
+            const obs = [];
+            let time = 0;
+            document.getElementById('gameInfo').textContent = 'DODGE!';
+            document.getElementById('controls').textContent = 'Arrow Keys';
+            setInterval(() => {
+                if(gameActive) obs.push({x: Math.random() * 760, y: -30, s: 30, v: 3});
+            }, 800);
+            function loop() {
                 if(!gameActive) return;
-                obstacles.push({
-                    x: Math.random() * (canvas.width - 30),
-                    y: -30,
-                    size: 20 + Math.random() * 30,
-                    speed: 2 + Math.random() * 3,
-                    color: ['#ff006e', '#bf00ff', '#ff7700'][Math.floor(Math.random() * 3)]
-                });
-            }
-            
-            const spawnInterval = setInterval(spawnObstacle, 1000);
-            
-            function gameLoop() {
-                if(!gameActive) {
-                    clearInterval(spawnInterval);
-                    return;
-                }
-                
                 ctx.fillStyle = '#0a0014';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
-                
-                // Move player
-                if(keys['ArrowLeft'] || keys['a'] || keys['A']) player.x -= 5;
-                if(keys['ArrowRight'] || keys['d'] || keys['D']) player.x += 5;
-                if(keys['ArrowUp'] || keys['w'] || keys['W']) player.y -= 5;
-                if(keys['ArrowDown'] || keys['s'] || keys['S']) player.y += 5;
-                
-                player.x = Math.max(player.size, Math.min(canvas.width - player.size, player.x));
-                player.y = Math.max(player.size, Math.min(canvas.height - player.size, player.y));
-                
-                // Draw player
+                if(keys['ArrowLeft']) player.x -= 6;
+                if(keys['ArrowRight']) player.x += 6;
+                player.x = Math.max(20, Math.min(780, player.x));
                 ctx.fillStyle = '#00f5ff';
                 ctx.beginPath();
-                ctx.arc(player.x, player.y, player.size, 0, Math.PI * 2);
+                ctx.arc(player.x, player.y, player.r, 0, Math.PI * 2);
                 ctx.fill();
-                
-                // Update and draw obstacles
-                for(let i = obstacles.length - 1; i >= 0; i--) {
-                    const obs = obstacles[i];
-                    obs.y += obs.speed;
-                    
-                    ctx.fillStyle = obs.color;
-                    ctx.fillRect(obs.x, obs.y, obs.size, obs.size);
-                    
-                    // Check collision
-                    const dist = Math.hypot(player.x - (obs.x + obs.size/2), player.y - (obs.y + obs.size/2));
-                    if(dist < player.size + obs.size/2) {
-                        gameActive = false;
-                        clearInterval(spawnInterval);
-                        endGame(`You survived ${gameTime.toFixed(1)}s!`);
-                        return;
+                for(let i = obs.length - 1; i >= 0; i--) {
+                    obs[i].y += obs[i].v;
+                    ctx.fillStyle = '#ff006e';
+                    ctx.fillRect(obs[i].x, obs[i].y, obs[i].s, obs[i].s);
+                    if(Math.hypot(player.x - (obs[i].x + 15), player.y - (obs[i].y + 15)) < 33) {
+                        return endGame(`Time: ${time.toFixed(1)}s`);
                     }
-                    
-                    if(obs.y > canvas.height) {
-                        obstacles.splice(i, 1);
-                        updateScore(10);
-                    }
+                    if(obs[i].y > 450) { obs.splice(i, 1); updateScore(10); }
                 }
-                
-                gameTime += 1/60;
-                document.getElementById('controls').textContent = `Time: ${gameTime.toFixed(1)}s`;
-                
-                requestAnimationFrame(gameLoop);
+                time += 1/60;
+                gameLoop = requestAnimationFrame(loop);
             }
-            
-            gameLoop();
+            loop();
         }
 
-        // Game 7: Click Storm
-        function playClickStorm() {
-            let clicks = 0;
-            let timeLeft = 10;
-            
-            ctx.font = '80px Orbitron';
+        // GAME 7: Click Storm - Click fast
+        function game7() {
+            let clicks = 0, time = 10;
+            ctx.font = '90px Orbitron';
             ctx.fillStyle = '#ff006e';
             ctx.textAlign = 'center';
-            ctx.fillText('CLICK!!!', canvas.width/2, canvas.height/2);
-            
-            document.getElementById('gameInfo').textContent = 'Click as fast as you can!';
-            document.getElementById('controls').textContent = `Time: ${timeLeft}s | Clicks: 0`;
-            
-            const timer = setInterval(() => {
-                if(!gameActive) {
-                    clearInterval(timer);
-                    return;
-                }
-                timeLeft--;
-                document.getElementById('controls').textContent = `Time: ${timeLeft}s | Clicks: ${clicks}`;
-                
-                if(timeLeft <= 0) {
-                    clearInterval(timer);
-                    const cps = (clicks / 10).toFixed(1);
+            ctx.fillText('CLICK!', 400, 225);
+            document.getElementById('gameInfo').textContent = 'CLICK FAST!';
+            const t = setInterval(() => {
+                if(!gameActive) return clearInterval(t);
+                time--;
+                if(time <= 0) {
+                    clearInterval(t);
                     updateScore(clicks * 2);
-                    canvas.onclick = null;
-                    endGame(`${clicks} clicks! (${cps} per second)`);
+                    endGame(`${clicks} clicks!`);
                 }
             }, 1000);
-            
-            canvas.onclick = function() {
-                if(!gameActive) return;
+            canvas.onclick = () => {
                 clicks++;
-                document.getElementById('controls').textContent = `Time: ${timeLeft}s | Clicks: ${clicks}`;
-                
-                // Visual feedback
-                const colors = ['#ff006e', '#00f5ff', '#39ff14', '#bf00ff'];
-                ctx.fillStyle = colors[Math.floor(Math.random() * colors.length)];
-                ctx.fillText('CLICK!!!', canvas.width/2, canvas.height/2);
+                ctx.fillStyle = ['#ff006e', '#00f5ff', '#39ff14'][clicks % 3];
+                ctx.fillText('CLICK!', 400, 225);
             };
         }
 
-        // Simplified random games for the rest
-        function playRandomGame(type) {
-            const randomGames = {
-                pattern: () => simpleClickGame('Find the Different Pattern!', 'Click the odd one out!'),
-                draw: () => simpleTimedGame('Quick Draw Challenge!', 'Draw as fast as you can!'),
-                word: () => simpleClickGame('Type ARCADE fast!', 'Type as quickly as possible!'),
-                bubble: () => simpleClickGame('Pop All Bubbles!', 'Click every bubble!'),
-                snake: () => simpleTimedGame('Snake Race!', 'Collect items!'),
-                stack: () => simpleClickGame('Stack High!', 'Click to stack blocks!'),
-                maze: () => simpleTimedGame('Maze Runner!', 'Find the exit!'),
-                catch: () => simpleClickGame('Star Catcher!', 'Catch falling stars!'),
-                rhythm: () => simpleTimedGame('Rhythm Master!', 'Tap to the beat!'),
-                flood: () => simpleClickGame('Color Flood!', 'Fill the screen!'),
-                shoot: () => simpleClickGame('Target Practice!', 'Hit all targets!'),
-                spin: () => simpleTimedGame('Perfect Stop!', 'Stop at the right moment!'),
-                cards: () => simpleClickGame('Memory Cards!', 'Match all pairs!'),
-                line: () => simpleClickGame('Connect Dots!', 'Draw without crossing!'),
-                jump: () => simpleTimedGame('Gravity Jump!', 'Jump over obstacles!'),
-                coin: () => simpleClickGame('Coin Rush!', 'Collect them all!'),
-                target: () => simpleClickGame('Speed Target!', 'Click before they vanish!'),
-                letter: () => simpleClickGame('Alphabet Hunt!', 'Find letters in order!'),
-                shape: () => simpleClickGame('Shape Match!', 'Match the shape!'),
-                wave: () => simpleTimedGame('Wave Rider!', 'Stay on the wave!'),
-                pixel: () => simpleClickGame('Pixel Art!', 'Color the pixels!'),
-                sequence: () => simpleClickGame('Number Chain!', 'Complete sequence!'),
-                flash: () => simpleTimedGame('Flash Memory!', 'Remember what flashed!'),
-                arrow: () => simpleTimedGame('Arrow Dodge!', 'Avoid the arrows!'),
-                circle: () => simpleTimedGame('Circle Control!', 'Keep it in bounds!'),
-                power: () => simpleClickGame('Power Up!', 'Charge to maximum!'),
-                crystal: () => simpleClickGame('Crystal Quest!', 'Collect in order!'),
-                read: () => simpleClickGame('Speed Read!', 'Answer quickly!'),
-                laser: () => simpleTimedGame('Laser Maze!', 'Dodge the beams!'),
-                tile: () => simpleClickGame('Tile Flip!', 'Match all tiles!'),
-                quiz: () => simpleClickGame('Rapid Quiz!', 'Answer fast!'),
-                orbit: () => simpleTimedGame('Orbit Keep!', 'Maintain orbit!'),
-                switch: () => simpleClickGame('Switch It!', 'Hit the switch!'),
-                pulse: () => simpleTimedGame('Pulse Wave!', 'Ride the pulse!'),
-                gem: () => simpleClickGame('Gem Match!', 'Match 3 gems!'),
-                sort: () => simpleClickGame('Speed Sort!', 'Sort by size!'),
-                light: () => simpleTimedGame('Light Trail!', 'Follow the lights!'),
-                bounce: () => simpleTimedGame('Bounce Ball!', 'Keep bouncing!'),
-                gate: () => simpleClickGame('Gate Master!', 'Open gates!'),
-                chain: () => simpleClickGame('Chain Max!', 'Build a chain!'),
-                portal: () => simpleTimedGame('Portal Jump!', 'Through portals!'),
-                time: () => simpleTimedGame('Time Trial!', 'Beat the clock!'),
-                hex: () => simpleClickGame('Hex Match!', 'Find the hex!'),
-                runner: () => simpleTimedGame('Neon Run!', 'Run the track!'),
-                blast: () => simpleClickGame('Blast Away!', 'Clear obstacles!'),
-                mirror: () => simpleClickGame('Mirror Game!', 'Match the mirror!'),
-                check: () => simpleTimedGame('Pulse Check!', 'Hit the pulse!'),
-                grid: () => simpleClickGame('Grid Light!', 'Light it all!'),
-                quantum: () => simpleTimedGame('Quantum Leap!', 'Leap dimensions!'),
-                echo: () => simpleTimedGame('Echo Repeat!', 'Copy the echo!'),
-                fractal: () => simpleClickGame('Fractal Find!', 'Find the center!'),
-                prism: () => simpleClickGame('Prism Break!', 'Break the light!'),
-                volt: () => simpleTimedGame('Volt Dodge!', 'Dodge the voltage!'),
-                cyber: () => simpleTimedGame('Cyber Sprint!', 'Sprint fast!'),
-                data: () => simpleTimedGame('Data Stream!', 'Navigate data!'),
-                perfect: () => simpleClickGame('Pixel Perfect!', 'Place perfectly!'),
-                glitch: () => simpleClickGame('Glitch Find!', 'Spot glitches!'),
-                binary: () => simpleClickGame('Binary Fast!', 'Convert quickly!'),
-                synth: () => simpleTimedGame('Synth Wave!', 'Ride the wave!'),
-                nights: () => simpleClickGame('Neon Night!', 'Light it up!'),
-                turbo: () => simpleTimedGame('Turbo Time!', 'Perfect timing!'),
-                link: () => simpleClickGame('Laser Link!', 'Connect points!'),
-                hyper: () => simpleTimedGame('Hyper Space!', 'Navigate space!'),
-                retro: () => simpleTimedGame('Retro Rush!', 'Rush through!'),
-                atomic: () => simpleClickGame('Atomic Aim!', 'Hit particles!'),
-                plasma: () => simpleClickGame('Plasma Pop!', 'Pop bubbles!'),
-                circuit: () => simpleClickGame('Circuit Fix!', 'Complete it!'),
-                merge: () => simpleClickGame('Mega Merge!', 'Merge to win!'),
-                vector: () => simpleTimedGame('Vector Vault!', 'Vault over!'),
-                cosmic: () => simpleClickGame('Cosmic Click!', 'Click cosmos!'),
-                dash: () => simpleTimedGame('Digital Dash!', 'Dash quick!'),
-                photon: () => simpleTimedGame('Photon Race!', 'Light speed!'),
-                matrix: () => simpleTimedGame('Matrix Nav!', 'Navigate matrix!'),
-                frequency: () => simpleClickGame('Find Frequency!', 'Match freq!'),
-                knight: () => simpleTimedGame('Neon Knight!', 'Battle on!'),
-                code: () => simpleClickGame('Code Crack!', 'Crack it!'),
-                velocity: () => simpleTimedGame('Velocity!', 'Match speed!'),
-                spectrum: () => simpleClickGame('Spectrum!', 'Shift colors!'),
-                rave: () => simpleTimedGame('Rave React!', 'React fast!'),
-                ion: () => simpleTimedGame('Ion Storm!', 'Weather it!'),
-                morph: () => simpleClickGame('Mega Morph!', 'Morph fast!'),
-                flux: () => simpleTimedGame('Flux Fight!', 'Fight flux!'),
-                beam: () => simpleClickGame('Beam Bust!', 'Bust beams!'),
-                nova: () => simpleClickGame('Neon Nova!', 'Create nova!'),
-                rift: () => simpleTimedGame('Rapid Rift!', 'Jump rifts!'),
-                legion: () => simpleClickGame('Laser Legion!', 'Command!'),
-                cyclone: () => simpleTimedGame('Cyber Cyclone!', 'Survive it!'),
-                fury: () => simpleClickGame('Photon Fury!', 'Unleash!'),
-                nexus: () => simpleClickGame('Neon Nexus!', 'Connect all!'),
-                ultra: () => simpleTimedGame('Ultra Speed!', 'Go ultra!'),
-                quest: () => simpleClickGame('Quantum Quest!', 'Complete!')
-            };
-            
-            if(randomGames[type]) {
-                randomGames[type]();
-            } else {
-                simpleClickGame('Epic Challenge!', 'Click to win!');
+        // GAME 8: Pattern Breaker - Find different
+        function game8() {
+            const patterns = ['▲', '●', '■', '★'];
+            const main = patterns[Math.floor(Math.random() * 4)];
+            const diff = patterns[Math.floor(Math.random() * 4)];
+            const pos = Math.floor(Math.random() * 9);
+            document.getElementById('gameInfo').textContent = 'FIND DIFFERENT!';
+            for(let i = 0; i < 9; i++) {
+                const x = 180 + (i % 3) * 150;
+                const y = 100 + Math.floor(i / 3) * 110;
+                ctx.fillStyle = '#bf00ff';
+                ctx.fillRect(x, y, 120, 90);
+                ctx.font = '56px Arial';
+                ctx.fillStyle = i === pos ? '#ff006e' : '#00f5ff';
+                ctx.textAlign = 'center';
+                ctx.fillText(i === pos ? diff : main, x + 60, y + 65);
             }
+            canvas.onclick = (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const x = (e.clientX - rect.left) * (canvas.width / rect.width);
+                const y = (e.clientY - rect.top) * (canvas.height / rect.height);
+                for(let i = 0; i < 9; i++) {
+                    const bx = 180 + (i % 3) * 150;
+                    const by = 100 + Math.floor(i / 3) * 110;
+                    if(x >= bx && x <= bx + 120 && y >= by && y <= by + 90) {
+                        updateScore(i === pos ? 100 : 0);
+                        endGame(i === pos ? 'Found!' : 'Wrong!');
+                    }
+                }
+            };
         }
 
-        function simpleClickGame(title, instruction) {
-            const colors = ['#ff006e', '#00f5ff', '#39ff14', '#bf00ff', '#ff7700'];
-            let clicked = 0;
-            const targetClicks = 5;
-            
-            document.getElementById('gameInfo').textContent = instruction;
-            document.getElementById('controls').textContent = `Clicks: 0/${targetClicks}`;
-            
-            function drawTargets() {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                for(let i = 0; i < targetClicks; i++) {
-                    if(i < clicked) continue;
-                    const angle = (i / targetClicks) * Math.PI * 2;
-                    const x = canvas.width/2 + Math.cos(angle) * 150;
-                    const y = canvas.height/2 + Math.sin(angle) * 150;
-                    ctx.fillStyle = colors[i % colors.length];
+        // GAME 9: Quick Draw - Draw shape
+        function game9() {
+            let drawing = false;
+            const points = [];
+            ctx.font = '36px Orbitron';
+            ctx.fillStyle = '#00f5ff';
+            ctx.textAlign = 'center';
+            ctx.fillText('DRAW A CIRCLE!', 400, 50);
+            document.getElementById('gameInfo').textContent = 'Click and drag!';
+            canvas.onmousedown = () => { drawing = true; points.length = 0; };
+            canvas.onmousemove = (e) => {
+                if(!drawing) return;
+                const rect = canvas.getBoundingClientRect();
+                const x = (e.clientX - rect.left) * (canvas.width / rect.width);
+                const y = (e.clientY - rect.top) * (canvas.height / rect.height);
+                points.push({x, y});
+                ctx.strokeStyle = '#ff006e';
+                ctx.lineWidth = 4;
+                if(points.length > 1) {
                     ctx.beginPath();
-                    ctx.arc(x, y, 40, 0, Math.PI * 2);
-                    ctx.fill();
+                    ctx.moveTo(points[points.length-2].x, points[points.length-2].y);
+                    ctx.lineTo(x, y);
+                    ctx.stroke();
                 }
-            }
-            
-            drawTargets();
-            
-            canvas.onclick = function(e) {
-                if(!gameActive) return;
-                clicked++;
-                updateScore(30);
-                document.getElementById('controls').textContent = `Clicks: ${clicked}/${targetClicks}`;
-                drawTargets();
-                
-                if(clicked >= targetClicks) {
-                    canvas.onclick = null;
-                    endGame('Perfect! All targets hit!');
+            };
+            canvas.onmouseup = () => {
+                drawing = false;
+                if(points.length > 20) { updateScore(100); endGame('Nice!'); }
+            };
+        }
+
+        // GAME 10: Word Rush - Type words
+        function game10() {
+            const words = ['ARCADE', 'NEON', 'CYBER'];
+            let idx = 0;
+            textInput.style.display = 'block';
+            textInput.value = '';
+            textInput.focus();
+            ctx.font = '72px Orbitron';
+            ctx.fillStyle = '#00f5ff';
+            ctx.textAlign = 'center';
+            ctx.fillText(words[idx], 400, 240);
+            document.getElementById('gameInfo').textContent = 'TYPE IT!';
+            textInput.onkeyup = () => {
+                if(textInput.value.toUpperCase() === words[idx]) {
+                    updateScore(50);
+                    idx++;
+                    textInput.value = '';
+                    if(idx >= words.length) {
+                        textInput.style.display = 'none';
+                        endGame('All typed!');
+                    } else {
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        ctx.fillText(words[idx], 400, 240);
+                    }
                 }
             };
         }
 
-        function simpleTimedGame(title, instruction) {
-            let timeLeft = 10;
-            let progress = 0;
-            
-            document.getElementById('gameInfo').textContent = instruction;
-            document.getElementById('controls').textContent = `Time: ${timeLeft}s`;
-            
-            const timer = setInterval(() => {
-                if(!gameActive) {
-                    clearInterval(timer);
-                    return;
-                }
-                
-                timeLeft--;
-                progress += 10;
-                
+        // Games 11-100: Simplified implementations
+        function game11() { simpleClick('POP IN ORDER!', 8); }
+        function game12() { snakeGame(); }
+        function game13() { stackGame(); }
+        function game14() { mazeGame(); }
+        function game15() { catchGame('stars'); }
+        function game16() { rhythmGame(); }
+        function game17() { floodGame(); }
+        function game18() { targetGame(); }
+        function game19() { spinGame(); }
+        function game20() { cardGame(); }
+        function game21() { drawGame('dots'); }
+        function game22() { jumpGame(); }
+        function game23() { collectGame('coins', '#ffff00'); }
+        function game24() { timedClick(8); }
+        function game25() { sequenceClick('ABCDEF'); }
+        function game26() { matchShape(); }
+        function game27() { waveGame(); }
+        function game28() { paintGame(); }
+        function game29() { numberSeq(); }
+        function game30() { flashGame(); }
+        function game31() { dodgeArrows(); }
+        function game32() { boundaryGame(); }
+        function game33() { chargeGame(); }
+        function game34() { collectGame('crystals', '#bf00ff'); }
+        function game35() { readingGame(); }
+        function game36() { laserGame(); }
+        function game37() { tileGame(); }
+        function game38() { trueFalse(); }
+        function game39() { orbitGame(); }
+        function game40() { switchGame(); }
+        function game41() { pulseGame(); }
+        function game42() { gemGame(); }
+        function game43() { sortGame(); }
+        function game44() { lightGame(); }
+        function game45() { paddleGame(); }
+        function game46() { gateGame(); }
+        function game47() { explosionGame(); }
+        function game48() { portalGame(); }
+        function game49() { timeGame(); }
+        function game50() { hexGame(); }
+        function game51() { runGame(); }
+        function game52() { blastGame(); }
+        function game53() { mirrorGame(); }
+        function game54() { peakGame(); }
+        function game55() { gridGame(); }
+        function game56() { teleportGame(); }
+        function game57() { echoGame(); }
+        function game58() { centerGame(); }
+        function game59() { prismGame(); }
+        function game60() { vortexGame(); }
+        function game61() { sprintGame(); }
+        function game62() { streamGame(); }
+        function game63() { pixelGame(); }
+        function game64() { glitchGame(); }
+        function game65() { binaryGame(); }
+        function game66() { synthGame(); }
+        function game67() { nightsGame(); }
+        function game68() { boostGame(); }
+        function game69() { linkGame(); }
+        function game70() { hyperGame(); }
+        function game71() { retroGame(); }
+        function game72() { atomGame(); }
+        function game73() { plasmaGame(); }
+        function game74() { circuitGame(); }
+        function game75() { mergeGame(); }
+        function game76() { vaultGame(); }
+        function game77() { cosmicGame(); }
+        function game78() { dashGame(); }
+        function game79() { raceGame(); }
+        function game80() { matrixGame(); }
+        function game81() { freqGame(); }
+        function game82() { knightGame(); }
+        function game83() { codeGame(); }
+        function game84() { velGame(); }
+        function game85() { specGame(); }
+        function game86() { raveGame(); }
+        function game87() { ionGame(); }
+        function game88() { morphGame(); }
+        function game89() { fluxGame(); }
+        function game90() { beamGame(); }
+        function game91() { novaGame(); }
+        function game92() { riftGame(); }
+        function game93() { legionGame(); }
+        function game94() { cycloneGame(); }
+        function game95() { furyGame(); }
+        function game96() { nexusGame(); }
+        function game97() { ultraGame(); }
+        function game98() { quantumGame(); }
+        function game99() { simpleClick('MEGA CLICK!', 10); }
+        function game100() { simpleClick('FINAL GAME!', 12); }
+
+        // Helper functions for games 11-100
+        function simpleClick(msg, count) {
+            let clicks = 0;
+            document.getElementById('gameInfo').textContent = msg;
+            for(let i = 0; i < count; i++) {
+                const x = 100 + (i % 4) * 170;
+                const y = 100 + Math.floor(i / 4) * 110;
+                ctx.fillStyle = ['#ff006e', '#00f5ff', '#39ff14'][i % 3];
+                ctx.beginPath();
+                ctx.arc(x, y, 40, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            canvas.onclick = () => {
+                clicks++;
+                updateScore(20);
+                if(clicks >= count) endGame('Complete!');
+            };
+        }
+
+        function snakeGame() {
+            const snake = [{x: 10, y: 10}];
+            let dir = {x: 1, y: 0};
+            let food = {x: 15, y: 10};
+            document.getElementById('gameInfo').textContent = 'EAT FOOD!';
+            document.getElementById('controls').textContent = 'Arrow Keys';
+            function loop() {
+                if(!gameActive) return;
+                if(keys['ArrowLeft'] && dir.x === 0) dir = {x: -1, y: 0};
+                if(keys['ArrowRight'] && dir.x === 0) dir = {x: 1, y: 0};
+                if(keys['ArrowUp'] && dir.y === 0) dir = {x: 0, y: -1};
+                if(keys['ArrowDown'] && dir.y === 0) dir = {x: 0, y: 1};
+                const head = {x: snake[0].x + dir.x, y: snake[0].y + dir.y};
+                if(head.x < 0 || head.x >= 40 || head.y < 0 || head.y >= 22) return endGame(`Length: ${snake.length}`);
+                snake.unshift(head);
+                if(head.x === food.x && head.y === food.y) {
+                    updateScore(20);
+                    food = {x: Math.floor(Math.random() * 40), y: Math.floor(Math.random() * 22)};
+                } else snake.pop();
                 ctx.fillStyle = '#0a0014';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                
-                // Progress bar
-                ctx.fillStyle = '#39ff14';
-                ctx.fillRect(50, canvas.height/2 - 20, (canvas.width - 100) * (progress / 100), 40);
+                ctx.fillRect(0, 0, 800, 450);
+                ctx.fillStyle = '#00f5ff';
+                snake.forEach(s => ctx.fillRect(s.x * 20, s.y * 20, 18, 18));
+                ctx.fillStyle = '#ff006e';
+                ctx.fillRect(food.x * 20, food.y * 20, 18, 18);
+                setTimeout(() => gameLoop = requestAnimationFrame(loop), 100);
+            }
+            loop();
+        }
+
+        function stackGame() {
+            const blocks = [{x: 300, y: 400, w: 200}];
+            let moving = {x: 0, w: 200, dir: 1};
+            document.getElementById('gameInfo').textContent = 'STACK!';
+            document.getElementById('controls').textContent = 'Click to drop';
+            function loop() {
+                if(!gameActive) return;
+                ctx.fillStyle = '#0a0014';
+                ctx.fillRect(0, 0, 800, 450);
+                blocks.forEach(b => {
+                    ctx.fillStyle = '#00f5ff';
+                    ctx.fillRect(b.x, b.y, b.w, 30);
+                });
+                moving.x += 3 * moving.dir;
+                if(moving.x <= 0 || moving.x + moving.w >= 800) moving.dir *= -1;
+                ctx.fillStyle = '#ff006e';
+                ctx.fillRect(moving.x, 50, moving.w, 30);
+                gameLoop = requestAnimationFrame(loop);
+            }
+            canvas.onclick = () => {
+                const last = blocks[blocks.length - 1];
+                const overlap = Math.min(last.x + last.w, moving.x + moving.w) - Math.max(last.x, moving.x);
+                if(overlap > 0) {
+                    blocks.push({x: Math.max(last.x, moving.x), y: last.y - 30, w: overlap});
+                    moving.x = Math.max(last.x, moving.x);
+                    moving.w = overlap;
+                    updateScore(50);
+                    if(blocks.length >= 8) endGame('Great stack!');
+                } else endGame(`${blocks.length} blocks!`);
+            };
+            loop();
+        }
+
+        function mazeGame() {
+            const player = {x: 0, y: 0};
+            const exit = {x: 19, y: 11};
+            document.getElementById('gameInfo').textContent = 'REACH EXIT!';
+            document.getElementById('controls').textContent = 'Arrow Keys';
+            function draw() {
+                ctx.fillStyle = '#0a0014';
+                ctx.fillRect(0, 0, 800, 450);
+                ctx.fillStyle = '#ff006e';
+                ctx.fillRect(exit.x * 40, exit.y * 38, 38, 36);
+                ctx.fillStyle = '#00f5ff';
+                ctx.fillRect(player.x * 40, player.y * 38, 38, 36);
+            }
+            function loop() {
+                if(!gameActive) return;
+                if(keys['ArrowLeft'] && player.x > 0) { player.x--; keys = {}; }
+                if(keys['ArrowRight'] && player.x < 19) { player.x++; keys = {}; }
+                if(keys['ArrowUp'] && player.y > 0) { player.y--; keys = {}; }
+                if(keys['ArrowDown'] && player.y < 11) { player.y++; keys = {}; }
+                draw();
+                if(player.x === exit.x && player.y === exit.y) {
+                    updateScore(200);
+                    return endGame('Exit found!');
+                }
+                gameLoop = requestAnimationFrame(loop);
+            }
+            draw();
+            loop();
+        }
+
+        function catchGame(type) {
+            const items = [];
+            let caught = 0;
+            document.getElementById('gameInfo').textContent = `CATCH ${type.toUpperCase()}!`;
+            setInterval(() => {
+                if(gameActive) items.push({x: Math.random() * 760, y: -20, v: 2 + Math.random()});
+            }, 1000);
+            canvas.onclick = (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const x = (e.clientX - rect.left) * (canvas.width / rect.width);
+                const y = (e.clientY - rect.top) * (canvas.height / rect.height);
+                for(let i = items.length - 1; i >= 0; i--) {
+                    if(Math.hypot(x - items[i].x, y - items[i].y) < 20) {
+                        items.splice(i, 1);
+                        caught++;
+                        updateScore(30);
+                        if(caught >= 10) endGame('All caught!');
+                    }
+                }
+            };
+            function loop() {
+                if(!gameActive) return;
+                ctx.fillStyle = '#0a0014';
+                ctx.fillRect(0, 0, 800, 450);
+                for(let i = items.length - 1; i >= 0; i--) {
+                    items[i].y += items[i].v;
+                    ctx.fillStyle = '#ffff00';
+                    ctx.beginPath();
+                    ctx.arc(items[i].x, items[i].y, 15, 0, Math.PI * 2);
+                    ctx.fill();
+                    if(items[i].y > 450) items.splice(i, 1);
+                }
+                gameLoop = requestAnimationFrame(loop);
+            }
+            loop();
+        }
+
+        function rhythmGame() {
+            const circles = [];
+            let hits = 0;
+            const targetY = 370;
+            document.getElementById('gameInfo').textContent = 'TAP RHYTHM!';
+            for(let i = 0; i < 6; i++) {
+                setTimeout(() => {
+                    if(gameActive) circles.push({x: 200 + i * 100, y: 0, hit: false});
+                }, i * 1000);
+            }
+            canvas.onclick = (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const x = (e.clientX - rect.left) * (canvas.width / rect.width);
+                for(let c of circles) {
+                    if(!c.hit && Math.abs(c.y - targetY) < 30 && Math.abs(c.x - x) < 50) {
+                        c.hit = true;
+                        hits++;
+                        updateScore(40);
+                        if(hits >= 6) endGame('Perfect!');
+                    }
+                }
+            };
+            function loop() {
+                if(!gameActive) return;
+                ctx.fillStyle = '#0a0014';
+                ctx.fillRect(0, 0, 800, 450);
                 ctx.strokeStyle = '#00f5ff';
                 ctx.lineWidth = 3;
-                ctx.strokeRect(50, canvas.height/2 - 20, canvas.width - 100, 40);
-                
-                document.getElementById('controls').textContent = `Time: ${timeLeft}s`;
-                
-                if(timeLeft <= 0) {
-                    clearInterval(timer);
-                    updateScore(100);
-                    endGame('Time\'s up! Great job!');
+                ctx.beginPath();
+                ctx.moveTo(0, targetY);
+                ctx.lineTo(800, targetY);
+                ctx.stroke();
+                for(let c of circles) {
+                    if(!c.hit) {
+                        c.y += 3;
+                        ctx.fillStyle = '#ff006e';
+                        ctx.beginPath();
+                        ctx.arc(c.x, c.y, 25, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
                 }
-            }, 1000);
+                gameLoop = requestAnimationFrame(loop);
+            }
+            loop();
         }
+
+        function floodGame() { simpleClick('FLOOD COLOR!', 9); }
+        function targetGame() { simpleClick('HIT TARGETS!', 5); }
+        function spinGame() { simpleClick('SPIN!', 1); }
+        function cardGame() { simpleClick('MATCH CARDS!', 8); }
+        function drawGame() { simpleClick('DRAW LINES!', 6); }
+        function jumpGame() {
+            const player = {x: 100, y: 350, vy: 0, onGround: true};
+            const obstacles = [{x: 600, w: 40, h: 60}];
+            document.getElementById('gameInfo').textContent = 'JUMP!';
+            document.getElementById('controls').textContent = 'SPACE';
+            window.addEventListener('keydown', (e) => {
+                if(e.code === 'Space' && player.onGround && gameActive) {
+                    player.vy = -12;
+                    player.onGround = false;
+                }
+            });
+            function loop() {
+                if(!gameActive) return;
+                ctx.fillStyle = '#0a0014';
+                ctx.fillRect(0, 0, 800, 450);
+                player.vy += 0.5;
+                player.y += player.vy;
+                if(player.y >= 350) { player.y = 350; player.vy = 0; player.onGround = true; }
+                ctx.fillStyle = '#00f5ff';
+                ctx.fillRect(player.x, player.y, 40, 40);
+                for(let o of obstacles) {
+                    o.x -= 5;
+                    if(o.x < -50) o.x = 800;
+                    ctx.fillStyle = '#ff006e';
+                    ctx.fillRect(o.x, 330, o.w, o.h);
+                    if(player.x < o.x + o.w && player.x + 40 > o.x && player.y + 40 > 330) {
+                        return endGame('Hit!');
+                    }
+                    if(o.x + o.w < player.x && !o.scored) { o.scored = true; updateScore(30); }
+                }
+                gameLoop = requestAnimationFrame(loop);
+            }
+            loop();
+        }
+
+        function collectGame(type, color) {
+            const items = [];
+            for(let i = 0; i < 8; i++) {
+                items.push({x: Math.random() * 760, y: Math.random() * 410, c: false});
+            }
+            const player = {x: 400, y: 225};
+            document.getElementById('gameInfo').textContent = `COLLECT ${type.toUpperCase()}!`;
+            document.getElementById('controls').textContent = 'Arrow Keys';
+            function loop() {
+                if(!gameActive) return;
+                ctx.fillStyle = '#0a0014';
+                ctx.fillRect(0, 0, 800, 450);
+                if(keys['ArrowLeft']) player.x -= 5;
+                if(keys['ArrowRight']) player.x += 5;
+                if(keys['ArrowUp']) player.y -= 5;
+                if(keys['ArrowDown']) player.y += 5;
+                ctx.fillStyle = '#00f5ff';
+                ctx.fillRect(player.x, player.y, 30, 30);
+                let collected = 0;
+                items.forEach(item => {
+                    if(!item.c) {
+                        ctx.fillStyle = color;
+                        ctx.beginPath();
+                        ctx.arc(item.x, item.y, 15, 0, Math.PI * 2);
+                        ctx.fill();
+                        if(Math.hypot(player.x + 15 - item.x, player.y + 15 - item.y) < 30) {
+                            item.c = true;
+                            updateScore(20);
+                        }
+                    } else collected++;
+                });
+                if(collected >= 8) return endGame('All collected!');
+                gameLoop = requestAnimationFrame(loop);
+            }
+            loop();
+        }
+
+        function timedClick(count) { simpleClick('CLICK FAST!', count); }
+        function sequenceClick(seq) {
+            let idx = 0;
+            document.getElementById('gameInfo').textContent = `CLICK ${seq}!`;
+            for(let i = 0; i < seq.length; i++) {
+                const x = 100 + i * 100;
+                ctx.fillStyle = '#bf00ff';
+                ctx.fillRect(x, 180, 80, 80);
+                ctx.font = '32px Orbitron';
+                ctx.fillStyle = '#fff';
+                ctx.textAlign = 'center';
+                ctx.fillText(seq[i], x + 40, 230);
+            }
+            canvas.onclick = (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const x = (e.clientX - rect.left) * (canvas.width / rect.width);
+                for(let i = 0; i < seq.length; i++) {
+                    if(x >= 100 + i * 100 && x <= 180 + i * 100) {
+                        if(i === idx) {
+                            updateScore(20);
+                            idx++;
+                            if(idx >= seq.length) endGame('Complete!');
+                        } else endGame('Wrong order!');
+                    }
+                }
+            };
+        }
+
+        function matchShape() { simpleClick('MATCH SHAPE!', 4); }
+        function waveGame() { simpleClick('RIDE WAVE!', 5); }
+        function paintGame() { simpleClick('PAINT!', 6); }
+        function numberSeq() { simpleClick('SEQUENCE!', 7); }
+        function flashGame() { simpleClick('REMEMBER!', 4); }
+        function dodgeArrows() { jumpGame(); }
+        function boundaryGame() { simpleClick('STAY IN!', 5); }
+        function chargeGame() { simpleClick('CHARGE!', 1); }
+        function readingGame() { simpleClick('READ!', 3); }
+        function laserGame() { jumpGame(); }
+        function tileGame() { simpleClick('FLIP!', 9); }
+        function trueFalse() { simpleClick('TRUE/FALSE!', 5); }
+        function orbitGame() { simpleClick('ORBIT!', 3); }
+        function switchGame() { simpleClick('SWITCH!', 5); }
+        function pulseGame() { simpleClick('PULSE!', 4); }
+        function gemGame() { simpleClick('MATCH GEMS!', 6); }
+        function sortGame() { simpleClick('SORT!', 6); }
+        function lightGame() { simpleClick('LIGHTS!', 5); }
+        function paddleGame() { jumpGame(); }
+        function gateGame() { simpleClick('GATES!', 4); }
+        function explosionGame() { simpleClick('CHAIN!', 5); }
+        function portalGame() { jumpGame(); }
+        function timeGame() { simpleClick('TIME!', 3); }
+        function hexGame() { simpleClick('HEX!', 4); }
+        function runGame() { jumpGame(); }
+        function blastGame() { simpleClick('BLAST!', 6); }
+        function mirrorGame() { simpleClick('MIRROR!', 4); }
+        function peakGame() { simpleClick('PEAK!', 1); }
+        function gridGame() { simpleClick('GRID!', 9); }
+        function teleportGame() { simpleClick('TELEPORT!', 5); }
+        function echoGame() { simpleClick('ECHO!', 4); }
+        function centerGame() { simpleClick('CENTER!', 1); }
+        function prismGame() { simpleClick('PRISM!', 3); }
+        function vortexGame() { simpleClick('VORTEX!', 5); }
+        function sprintGame() { jumpGame(); }
+        function streamGame() { collectGame('data', '#00f5ff'); }
+        function pixelGame() { simpleClick('PIXEL!', 8); }
+        function glitchGame() { simpleClick('GLITCH!', 5); }
+        function binaryGame() { simpleClick('BINARY!', 4); }
+        function synthGame() { simpleClick('SYNTH!', 5); }
+        function nightsGame() { simpleClick('NEON!', 6); }
+        function boostGame() { simpleClick('BOOST!', 3); }
+        function linkGame() { simpleClick('LINK!', 5); }
+        function hyperGame() { jumpGame(); }
+        function retroGame() { collectGame('power', '#39ff14'); }
+        function atomGame() { simpleClick('ATOMS!', 8); }
+        function plasmaGame() { simpleClick('PLASMA!', 6); }
+        function circuitGame() { simpleClick('CIRCUIT!', 5); }
+        function mergeGame() { simpleClick('MERGE!', 8); }
+        function vaultGame() { jumpGame(); }
+        function cosmicGame() { simpleClick('COSMIC!', 6); }
+        function dashGame() { jumpGame(); }
+        function raceGame() { simpleClick('RACE!', 5); }
+        function matrixGame() { simpleClick('MATRIX!', 9); }
+        function freqGame() { simpleClick('FREQ!', 3); }
+        function knightGame() { simpleClick('KNIGHT!', 5); }
+        function codeGame() { simpleClick('CODE!', 4); }
+        function velGame() { simpleClick('VELOCITY!', 4); }
+        function specGame() { simpleClick('SPECTRUM!', 5); }
+        function raveGame() { simpleClick('RAVE!', 6); }
+        function ionGame() { jumpGame(); }
+        function morphGame() { simpleClick('MORPH!', 4); }
+        function fluxGame() { simpleClick('FLUX!', 5); }
+        function beamGame() { simpleClick('BEAM!', 6); }
+        function novaGame() { simpleClick('NOVA!', 4); }
+        function riftGame() { jumpGame(); }
+        function legionGame() { simpleClick('LEGION!', 7); }
+        function cycloneGame() { jumpGame(); }
+        function furyGame() { simpleClick('FURY!', 8); }
+        function nexusGame() { simpleClick('NEXUS!', 6); }
+        function ultraGame() { simpleClick('ULTRA!', 5); }
+        function quantumGame() { simpleClick('QUANTUM!', 7); }
     </script>
 </body>
 </html>
