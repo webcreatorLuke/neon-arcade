@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎮 NEON ARCADE - 100 Games</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght:400;700;900&family=Rajdhani:wght:300;500;700&display=swap');
+        
+        :root {
+            --neon-pink: #ff006e;
+            --neon-blue: #00f5ff;
+            --neon-green: #39ff14;
+            --neon-purple: #bf00ff;
+            --neon-orange: #ff7700;
+            --neon-yellow: #ffff00;
+            --dark-bg: #0a0014;
+            --card-bg: #1a0f2e;
+            --grid-color: rgba(191, 0, 255, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background: var(--dark-bg);
+            color: var(--neon-blue);
+            overflow-x: hidden;
+            min-height: 100vh;
+            position: relative;
+        }
+        
+        /* Animated grid background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(191, 0, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(191, 0, 255, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridScroll 20s linear infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        @keyframes gridScroll {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(50px); }
+        }
+        
+        /* Floating particles */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(2px 2px at 20% 30%, var(--neon-pink), transparent),
+                radial-gradient(2px 2px at 60% 70%, var(--neon-blue), transparent),
+                radial-gradient(1px 1px at 50% 50%, var(--neon-green), transparent),
+                radial-gradient(1px 1px at 80% 10%, var(--neon-purple), transparent),
+                radial-gradient(2px 2px at 90% 60%, var(--neon-orange), transparent);
+            background-size: 200% 200%;
+            animation: particles 15s ease infinite;
+            opacity: 0.4;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        @keyframes particles {
+            0%, 100% { background-position: 0% 0%; }
+            50% { background-position: 100% 100%; }
+        }
+        
+        header {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            padding: 3rem 2rem 2rem;
+            background: linear-gradient(180deg, rgba(26, 15, 46, 0.9) 0%, transparent 100%);
+        }
+        
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(2.5rem, 8vw, 6rem);
+            font-weight: 900;
+            background: linear-gradient(45deg, var(--neon-pink), var(--neon-purple), var(--neon-blue));
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientShift 3s ease infinite, glitch 5s infinite;
+            text-shadow: 0 0 20px rgba(255, 0, 110, 0.5);
+            letter-spacing: 0.1em;
+            position: relative;
+        }
+        
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        
+        @keyframes glitch {
+            0%, 90%, 100% { transform: translateX(0); }
+            92% { transform: translateX(-3px); }
+            94% { transform: translateX(3px); }
+            96% { transform: translateX(-2px); }
+        }
+        
+        .subtitle {
+            font-size: 1.5rem;
+            color: var(--neon-green);
+            margin-top: 1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.3em;
+            animation: flicker 2s infinite;
+        }
+        
+        @keyframes flicker {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+            75% { opacity: 0.9; }
+        }
+        
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+        
+        .game-card {
+            background: var(--card-bg);
+            border: 2px solid var(--neon-purple);
+            border-radius: 15px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(191, 0, 255, 0.3);
+        }
+        
+        .game-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 0, 110, 0.1), transparent);
+            transform: rotate(45deg);
+            transition: all 0.6s ease;
+        }
+        
+        .game-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            border-color: var(--neon-pink);
+            box-shadow: 0 0 40px rgba(255, 0, 110, 0.6), 0 0 60px rgba(0, 245, 255, 0.3);
+        }
+        
+        .game-card:hover::before {
+            top: 50%;
+            left: 50%;
+        }
+        
+        .game-number {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--neon-purple);
+            color: white;
+            padding: 0.3rem 0.7rem;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            font-family: 'Orbitron', sans-serif;
+        }
+        
+        .game-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.3rem;
+            color: var(--neon-blue);
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+        
+        .game-description {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+            font-weight: 300;
+        }
+        
+        .play-btn {
+            background: linear-gradient(135deg, var(--neon-pink), var(--neon-purple));
+            color: white;
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 25px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            box-shadow: 0 4px 15px rgba(255, 0, 110, 0.4);
+        }
+        
+        .play-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 25px rgba(255, 0, 110, 0.7);
+        }
+        
+        /* Game Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 0, 20, 0.95);
+            backdrop-filter: blur(10px);
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .modal-content {
+            background: linear-gradient(135deg, #1a0f2e, #2a1547);
+            margin: 5% auto;
+            padding: 2rem;
+            border: 3px solid var(--neon-pink);
+            border-radius: 20px;
+            width: 90%;
+            max-width: 800px;
+            box-shadow: 0 0 50px rgba(255, 0, 110, 0.5);
+            animation: slideIn 0.4s ease;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .close {
+            color: var(--neon-pink);
+            float: right;
+            font-size: 2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .close:hover {
+            color: var(--neon-blue);
+            transform: rotate(90deg);
+        }
+        
+        #gameCanvas {
+            width: 100%;
+            max-width: 700px;
+            height: 400px;
+            background: #0a0014;
+            border: 2px solid var(--neon-purple);
+            border-radius: 10px;
+            margin: 1rem auto;
+            display: block;
+            box-shadow: inset 0 0 30px rgba(191, 0, 255, 0.3);
+        }
+        
+        #gameInfo {
+            text-align: center;
+            font-size: 1.2rem;
+            color: var(--neon-green);
+            margin: 1rem 0;
+            font-family: 'Orbitron', sans-serif;
+        }
+        
+        #score {
+            font-size: 2rem;
+            color: var(--neon-yellow);
+            text-align: center;
+            margin: 1rem 0;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            text-shadow: 0 0 10px var(--neon-yellow);
+        }
+        
+        .controls {
+            text-align: center;
+            margin-top: 1rem;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🎮 NEON ARCADE</h1>
+        <div class="subtitle">100 Epic Games</div>
+    </header>
+    
+    <div class="container">
+        <div class="games-grid" id="gamesGrid"></div>
+    </div>
+    
+    <div id="gameModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="modalTitle" style="font-family: 'Orbitron', sans-serif; color: var(--neon-pink); text-align: center; font-size: 2rem;"></h2>
+            <div id="score">SCORE: 0</div>
+            <canvas id="gameCanvas"></canvas>
+            <div id="gameInfo"></div>
+            <div class="controls" id="controls"></div>
+        </div>
+    </div>
+
+    <script>
+        const games = [
+            { name: "Color Clicker", desc: "Click the matching color before time runs out!", type: "color" },
+            { name: "Number Hunter", desc: "Find the highest number in the grid!", type: "number" },
+            { name: "Reaction Test", desc: "Click when the screen turns green!", type: "reaction" },
+            { name: "Memory Match", desc: "Remember the pattern and repeat it!", type: "memory" },
+            { name: "Speed Math", desc: "Solve math problems as fast as you can!", type: "math" },
+            { name: "Dodge Master", desc: "Avoid the falling obstacles!", type: "dodge" },
+            { name: "Click Storm", desc: "Click as many times as possible in 10 seconds!", type: "click" },
+            { name: "Pattern Breaker", desc: "Click the different pattern!", type: "pattern" },
+            { name: "Quick Draw", desc: "Draw the shape before time runs out!", type: "draw" },
+            { name: "Word Rush", desc: "Type the word as fast as you can!", type: "word" },
+            { name: "Bubble Pop", desc: "Pop all the bubbles in order!", type: "bubble" },
+            { name: "Snake Racer", desc: "Classic snake with a twist!", type: "snake" },
+            { name: "Block Stacker", desc: "Stack blocks as high as you can!", type: "stack" },
+            { name: "Maze Runner", desc: "Navigate through the random maze!", type: "maze" },
+            { name: "Reflex Master", desc: "Catch the falling stars!", type: "catch" },
+            { name: "Rhythm Tapper", desc: "Tap to the beat!", type: "rhythm" },
+            { name: "Color Flood", desc: "Fill the screen with one color!", type: "flood" },
+            { name: "Target Shooter", desc: "Hit the moving targets!", type: "shoot" },
+            { name: "Spin Master", desc: "Stop the spinner at the right time!", type: "spin" },
+            { name: "Card Flipper", desc: "Match all the cards!", type: "cards" },
+            { name: "Line Drawer", desc: "Connect all dots without crossing!", type: "line" },
+            { name: "Gravity Jump", desc: "Jump through obstacles!", type: "jump" },
+            { name: "Coin Collector", desc: "Collect all the coins!", type: "coin" },
+            { name: "Speed Clicker", desc: "Click all targets before they disappear!", type: "target" },
+            { name: "Letter Hunt", desc: "Find all the letters in order!", type: "letter" },
+            { name: "Shape Shifter", desc: "Transform shapes to match!", type: "shape" },
+            { name: "Wave Rider", desc: "Ride the wave without crashing!", type: "wave" },
+            { name: "Pixel Painter", desc: "Color the pixels to match!", type: "pixel" },
+            { name: "Number Sequence", desc: "Complete the number sequence!", type: "sequence" },
+            { name: "Flash Memory", desc: "Remember what flashed!", type: "flash" },
+            { name: "Arrow Attack", desc: "Dodge the arrows!", type: "arrow" },
+            { name: "Circle Chase", desc: "Keep the circle in bounds!", type: "circle" },
+            { name: "Power Surge", desc: "Charge up before time runs out!", type: "power" },
+            { name: "Crystal Collector", desc: "Collect all crystals in order!", type: "crystal" },
+            { name: "Speed Reader", desc: "Read and answer quickly!", type: "read" },
+            { name: "Laser Dodge", desc: "Avoid the laser beams!", type: "laser" },
+            { name: "Tile Flipper", desc: "Flip all tiles to the same color!", type: "tile" },
+            { name: "Rapid Response", desc: "Answer questions rapidly!", type: "quiz" },
+            { name: "Orbit Master", desc: "Keep objects in orbit!", type: "orbit" },
+            { name: "Switch Hitter", desc: "Hit the right switch!", type: "switch" },
+            { name: "Pulse Rider", desc: "Ride the pulse waves!", type: "pulse" },
+            { name: "Gem Matcher", desc: "Match 3 gems in a row!", type: "gem" },
+            { name: "Speed Sorter", desc: "Sort items by size!", type: "sort" },
+            { name: "Light Show", desc: "Follow the light sequence!", type: "light" },
+            { name: "Bounce Ball", desc: "Keep the ball bouncing!", type: "bounce" },
+            { name: "Gate Keeper", desc: "Open the right gates!", type: "gate" },
+            { name: "Chain Reaction", desc: "Create the longest chain!", type: "chain" },
+            { name: "Portal Jump", desc: "Jump through portals!", type: "portal" },
+            { name: "Time Warp", desc: "Beat the clock!", type: "time" },
+            { name: "Hex Hunter", desc: "Find matching hex colors!", type: "hex" },
+            { name: "Neon Runner", desc: "Run through the neon track!", type: "runner" },
+            { name: "Blast Zone", desc: "Click to blast away obstacles!", type: "blast" },
+            { name: "Mirror Match", desc: "Match the mirror image!", type: "mirror" },
+            { name: "Pulse Check", desc: "Click at the right pulse!", type: "check" },
+            { name: "Grid Master", desc: "Light up the entire grid!", type: "grid" },
+            { name: "Quantum Leap", desc: "Leap between dimensions!", type: "quantum" },
+            { name: "Echo Chamber", desc: "Repeat the echo pattern!", type: "echo" },
+            { name: "Fractal Focus", desc: "Find the center of fractals!", type: "fractal" },
+            { name: "Prism Break", desc: "Break light into colors!", type: "prism" },
+            { name: "Volt Vortex", desc: "Dodge the electric vortex!", type: "volt" },
+            { name: "Cyber Sprint", desc: "Sprint through cyberspace!", type: "cyber" },
+            { name: "Data Stream", desc: "Navigate the data stream!", type: "data" },
+            { name: "Pixel Perfect", desc: "Place pixels perfectly!", type: "perfect" },
+            { name: "Glitch Hunter", desc: "Find the glitches!", type: "glitch" },
+            { name: "Binary Blast", desc: "Convert to binary fast!", type: "binary" },
+            { name: "Synth Wave", desc: "Ride the synth waves!", type: "synth" },
+            { name: "Neon Nights", desc: "Light up the night!", type: "nights" },
+            { name: "Turbo Boost", desc: "Boost at the right time!", type: "turbo" },
+            { name: "Laser Link", desc: "Connect laser points!", type: "link" },
+            { name: "Hyper Space", desc: "Navigate hyperspace!", type: "hyper" },
+            { name: "Retro Rush", desc: "Rush through retro levels!", type: "retro" },
+            { name: "Atomic Aim", desc: "Aim at atomic particles!", type: "atomic" },
+            { name: "Plasma Pop", desc: "Pop plasma bubbles!", type: "plasma" },
+            { name: "Circuit Solver", desc: "Complete the circuit!", type: "circuit" },
+            { name: "Mega Merge", desc: "Merge until you reach mega!", type: "merge" },
+            { name: "Vector Vault", desc: "Vault over vectors!", type: "vector" },
+            { name: "Cosmic Click", desc: "Click cosmic objects!", type: "cosmic" },
+            { name: "Digital Dash", desc: "Dash through digital space!", type: "dash" },
+            { name: "Photon Race", desc: "Race at light speed!", type: "photon" },
+            { name: "Matrix Mind", desc: "Navigate the matrix!", type: "matrix" },
+            { name: "Frequency Find", desc: "Find the right frequency!", type: "frequency" },
+            { name: "Neon Knight", desc: "Battle in neon armor!", type: "knight" },
+            { name: "Code Cracker", desc: "Crack the color code!", type: "code" },
+            { name: "Velocity Vibe", desc: "Match the velocity vibe!", type: "velocity" },
+            { name: "Spectrum Shift", desc: "Shift through the spectrum!", type: "spectrum" },
+            { name: "Rave Reactor", desc: "React to the rave!", type: "rave" },
+            { name: "Ion Storm", desc: "Weather the ion storm!", type: "ion" },
+            { name: "Mega Morph", desc: "Morph shapes at mega speed!", type: "morph" },
+            { name: "Flux Fighter", desc: "Fight the flux!", type: "flux" },
+            { name: "Beam Buster", desc: "Bust through beams!", type: "beam" },
+            { name: "Neon Nova", desc: "Create a neon nova!", type: "nova" },
+            { name: "Rapid Rift", desc: "Jump through rifts rapidly!", type: "rift" },
+            { name: "Laser Legion", desc: "Command the laser legion!", type: "legion" },
+            { name: "Cyber Cyclone", desc: "Survive the cyber cyclone!", type: "cyclone" },
+            { name: "Photon Fury", desc: "Unleash photon fury!", type: "fury" },
+            { name: "Neon Nexus", desc: "Connect the neon nexus!", type: "nexus" },
+            { name: "Ultra Velocity", desc: "Reach ultra velocity!", type: "ultra" },
+            { name: "Quantum Quest", desc: "Complete quantum challenges!", type: "quest" }
+        ];
+
+        const modal = document.getElementById('gameModal');
+        const closeBtn = document.querySelector('.close');
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        let currentGame = null;
+        let score = 0;
+        let gameActive = false;
+
+        // Set canvas size
+        canvas.width = 700;
+        canvas.height = 400;
+
+        // Generate game cards
+        const gamesGrid = document.getElementById('gamesGrid');
+        games.forEach((game, index) => {
+            const card = document.createElement('div');
+            card.className = 'game-card';
+            card.innerHTML = `
+                <div class="game-number">#${index + 1}</div>
+                <h3 class="game-title">${game.name}</h3>
+                <p class="game-description">${game.desc}</p>
+                <button class="play-btn" onclick="startGame(${index})">PLAY NOW</button>
+            `;
+            gamesGrid.appendChild(card);
+        });
+
+        closeBtn.onclick = function() {
+            modal.style.display = 'none';
+            gameActive = false;
+        }
+
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = 'none';
+                gameActive = false;
+            }
+        }
+
+        function startGame(index) {
+            currentGame = games[index];
+            score = 0;
+            gameActive = true;
+            document.getElementById('modalTitle').textContent = currentGame.name;
+            document.getElementById('score').textContent = 'SCORE: 0';
+            modal.style.display = 'block';
+            initGame(currentGame.type);
+        }
+
+        function updateScore(points) {
+            score += points;
+            document.getElementById('score').textContent = `SCORE: ${score}`;
+        }
+
+        function endGame(message) {
+            gameActive = false;
+            ctx.fillStyle = '#1a0f2e';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.font = '40px Orbitron';
+            ctx.fillStyle = '#ff006e';
+            ctx.textAlign = 'center';
+            ctx.fillText('GAME OVER!', canvas.width/2, canvas.height/2 - 40);
+            ctx.font = '24px Orbitron';
+            ctx.fillStyle = '#00f5ff';
+            ctx.fillText(message, canvas.width/2, canvas.height/2 + 20);
+            ctx.fillText(`Final Score: ${score}`, canvas.width/2, canvas.height/2 + 60);
+        }
+
+        function initGame(type) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            document.getElementById('gameInfo').textContent = '';
+            document.getElementById('controls').textContent = '';
+
+            switch(type) {
+                case 'color':
+                    playColorClicker();
+                    break;
+                case 'number':
+                    playNumberHunter();
+                    break;
+                case 'reaction':
+                    playReactionTest();
+                    break;
+                case 'memory':
+                    playMemoryMatch();
+                    break;
+                case 'math':
+                    playSpeedMath();
+                    break;
+                case 'dodge':
+                    playDodgeMaster();
+                    break;
+                case 'click':
+                    playClickStorm();
+                    break;
+                default:
+                    playRandomGame(type);
+            }
+        }
+
+        // Game 1: Color Clicker
+        function playColorClicker() {
+            const colors = ['#ff006e', '#00f5ff', '#39ff14', '#bf00ff', '#ff7700'];
+            const colorNames = ['Pink', 'Blue', 'Green', 'Purple', 'Orange'];
+            let targetColor = Math.floor(Math.random() * colors.length);
+            let timeLeft = 5;
+            
+            document.getElementById('gameInfo').textContent = `Click the ${colorNames[targetColor]} square!`;
+            document.getElementById('controls').textContent = 'Time: 5s';
+            
+            // Draw colored squares
+            const squares = [];
+            for(let i = 0; i < 5; i++) {
+                const x = 50 + i * 130;
+                const y = 150;
+                squares.push({x, y, w: 100, h: 100, color: colors[i]});
+                ctx.fillStyle = colors[i];
+                ctx.fillRect(x, y, 100, 100);
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 3;
+                ctx.strokeRect(x, y, 100, 100);
+            }
+            
+            const timer = setInterval(() => {
+                if(!gameActive) {
+                    clearInterval(timer);
+                    return;
+                }
+                timeLeft--;
+                document.getElementById('controls').textContent = `Time: ${timeLeft}s`;
+                if(timeLeft <= 0) {
+                    clearInterval(timer);
+                    endGame('Time\'s up!');
+                }
+            }, 1000);
+            
+            canvas.onclick = function(e) {
+                if(!gameActive) return;
+                const rect = canvas.getBoundingClientRect();
+                const x = (e.clientX - rect.left) * (canvas.width / rect.width);
+                const y = (e.clientY - rect.top) * (canvas.height / rect.height);
+                
+                for(let i = 0; i < squares.length; i++) {
+                    const sq = squares[i];
+                    if(x >= sq.x && x <= sq.x + sq.w && y >= sq.y && y <= sq.y + sq.h) {
+                        clearInterval(timer);
+                        if(i === targetColor) {
+                            updateScore(100);
+                            endGame('Perfect! You got it!');
+                        } else {
+                            endGame('Wrong color!');
+                        }
+                        canvas.onclick = null;
+                        return;
+                    }
+                }
+            };
+        }
+
+        // Game 2: Number Hunter
+        function playNumberHunter() {
+            const numbers = [];
+            const positions = [];
+            let maxNum = 0;
+            let maxIndex = 0;
+            
+            document.getElementById('gameInfo').textContent = 'Click the HIGHEST number!';
+            document.getElementById('controls').textContent = 'You have 7 seconds!';
+            
+            for(let i = 0; i < 12; i++) {
+                const num = Math.floor(Math.random() * 99) + 1;
+                numbers.push(num);
+                if(num > maxNum) {
+                    maxNum = num;
+                    maxIndex = i;
+                }
+                
+                const x = 50 + (i % 4) * 150;
+                const y = 50 + Math.floor(i / 4) * 100;
+                positions.push({x, y, num});
+                
+                ctx.fillStyle = '#bf00ff';
+                ctx.fillRect(x, y, 120, 80);
+                ctx.font = '36px Orbitron';
+                ctx.fillStyle = '#fff';
+                ctx.textAlign = 'center';
+                ctx.fillText(num, x + 60, y + 50);
+            }
+            
+            let timeLeft = 7;
+            const timer = setInterval(() => {
+                if(!gameActive) {
+                    clearInterval(timer);
+                    return;
+                }
+                timeLeft--;
+                document.getElementById('controls').textContent = `Time: ${timeLeft}s`;
+                if(timeLeft <= 0) {
+                    clearInterval(timer);
+                    endGame(`Time's up! It was ${maxNum}`);
+                }
+            }, 1000);
+            
+            canvas.onclick = function(e) {
+                if(!gameActive) return;
+                const rect = canvas.getBoundingClientRect();
+                const x = (e.clientX - rect.left) * (canvas.width / rect.width);
+                const y = (e.clientY - rect.top) * (canvas.height / rect.height);
+                
+                for(let i = 0; i < positions.length; i++) {
+                    const pos = positions[i];
+                    if(x >= pos.x && x <= pos.x + 120 && y >= pos.y && y <= pos.y + 80) {
+                        clearInterval(timer);
+                        if(pos.num === maxNum) {
+                            updateScore(150);
+                            endGame('Correct! Great job!');
+                        } else {
+                            endGame(`Wrong! It was ${maxNum}`);
+                        }
+                        canvas.onclick = null;
+                        return;
+                    }
+                }
+            };
+        }
+
+        // Game 3: Reaction Test
+        function playReactionTest() {
+            ctx.fillStyle = '#ff006e';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            document.getElementById('gameInfo').textContent = 'Wait for GREEN...';
+            document.getElementById('controls').textContent = 'Click as fast as you can when it turns green!';
+            
+            const waitTime = 2000 + Math.random() * 3000;
+            let startTime;
+            
+            setTimeout(() => {
+                if(!gameActive) return;
+                ctx.fillStyle = '#39ff14';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                document.getElementById('gameInfo').textContent = 'CLICK NOW!';
+                startTime = Date.now();
+            }, waitTime);
+            
+            canvas.onclick = function() {
+                if(!gameActive) return;
+                if(!startTime) {
+                    endGame('Too early! Wait for green!');
+                } else {
+                    const reactionTime = Date.now() - startTime;
+                    const points = Math.max(0, 200 - Math.floor(reactionTime / 10));
+                    updateScore(points);
+                    endGame(`${reactionTime}ms reaction time!`);
+                }
+                canvas.onclick = null;
+            };
+        }
+
+        // Game 4: Memory Match
+        function playMemoryMatch() {
+            const sequence = [];
+            const gridSize = 4;
+            let round = 1;
+            let showingSequence = true;
+            let playerSequence = [];
+            
+            document.getElementById('gameInfo').textContent = 'Watch the pattern!';
+            document.getElementById('controls').textContent = 'Round 1';
+            
+            function generateSequence() {
+                sequence.push(Math.floor(Math.random() * (gridSize * gridSize)));
+            }
+            
+            function drawGrid() {
+                for(let i = 0; i < gridSize * gridSize; i++) {
+                    const x = 50 + (i % gridSize) * 150;
+                    const y = 50 + Math.floor(i / gridSize) * 80;
+                    ctx.fillStyle = '#1a0f2e';
+                    ctx.fillRect(x, y, 130, 60);
+                    ctx.strokeStyle = '#bf00ff';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(x, y, 130, 60);
+                }
+            }
+            
+            function showSequence() {
+                let index = 0;
+                const interval = setInterval(() => {
+                    if(!gameActive) {
+                        clearInterval(interval);
+                        return;
+                    }
+                    
+                    drawGrid();
+                    
+                    if(index < sequence.length) {
+                        const cell = sequence[index];
+                        const x = 50 + (cell % gridSize) * 150;
+                        const y = 50 + Math.floor(cell / gridSize) * 80;
+                        ctx.fillStyle = '#00f5ff';
+                        ctx.fillRect(x, y, 130, 60);
+                        index++;
+                    } else {
+                        clearInterval(interval);
+                        showingSequence = false;
+                        document.getElementById('gameInfo').textContent = 'Your turn! Repeat the pattern!';
+                    }
+                }, 800);
+            }
+            
+            generateSequence();
+            drawGrid();
+            setTimeout(showSequence, 1000);
+            
+            canvas.onclick = function(e) {
+                if(!gameActive || showingSequence) return;
+                
+                const rect = canvas.getBoundingClientRect();
+                const x = (e.clientX - rect.left) * (canvas.width / rect.width);
+                const y = (e.clientY - rect.top) * (canvas.height / rect.height);
+                
+                for(let i = 0; i < gridSize * gridSize; i++) {
+                    const cellX = 50 + (i % gridSize) * 150;
+                    const cellY = 50 + Math.floor(i / gridSize) * 80;
+                    
+                    if(x >= cellX && x <= cellX + 130 && y >= cellY && y <= cellY + 60) {
+                        playerSequence.push(i);
+                        
+                        // Flash the cell
+                        ctx.fillStyle = '#ff006e';
+                        ctx.fillRect(cellX, cellY, 130, 60);
+                        setTimeout(() => drawGrid(), 200);
+                        
+                        if(playerSequence[playerSequence.length - 1] !== sequence[playerSequence.length - 1]) {
+                            canvas.onclick = null;
+                            endGame(`Wrong! You made it to round ${round}`);
+                            return;
+                        }
+                        
+                        if(playerSequence.length === sequence.length) {
+                            updateScore(round * 50);
+                            round++;
+                            playerSequence = [];
+                            document.getElementById('controls').textContent = `Round ${round}`;
+                            
+                            if(round > 5) {
+                                canvas.onclick = null;
+                                endGame('Amazing! You won!');
+                                return;
+                            }
+                            
+                            showingSequence = true;
+                            document.getElementById('gameInfo').textContent = 'Next round!';
+                            setTimeout(() => {
+                                generateSequence();
+                                showSequence();
+                            }, 1000);
+                        }
+                        return;
+                    }
+                }
+            };
+        }
+
+        // Game 5: Speed Math
+        function playSpeedMath() {
+            let correctAnswers = 0;
+            let questionsAsked = 0;
+            
+            function newQuestion() {
+                const a = Math.floor(Math.random() * 20) + 1;
+                const b = Math.floor(Math.random() * 20) + 1;
+                const ops = ['+', '-', '×'];
+                const op = ops[Math.floor(Math.random() * ops.length)];
+                let answer;
+                
+                switch(op) {
+                    case '+': answer = a + b; break;
+                    case '-': answer = a - b; break;
+                    case '×': answer = a * b; break;
+                }
+                
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.font = '60px Orbitron';
+                ctx.fillStyle = '#00f5ff';
+                ctx.textAlign = 'center';
+                ctx.fillText(`${a} ${op} ${b} = ?`, canvas.width/2, canvas.height/2 - 40);
+                
+                const options = [answer];
+                while(options.length < 4) {
+                    const wrong = answer + Math.floor(Math.random() * 10) - 5;
+                    if(!options.includes(wrong) && wrong > 0) options.push(wrong);
+                }
+                options.sort(() => Math.random() - 0.5);
+                
+                for(let i = 0; i < 4; i++) {
+                    const x = 50 + i * 150;
+                    const y = canvas.height/2 + 40;
+                    ctx.fillStyle = '#bf00ff';
+                    ctx.fillRect(x, y, 130, 60);
+                    ctx.font = '32px Orbitron';
+                    ctx.fillStyle = '#fff';
+                    ctx.fillText(options[i], x + 65, y + 40);
+                }
+                
+                document.getElementById('gameInfo').textContent = `Question ${questionsAsked + 1}/5`;
+                
+                canvas.onclick = function(e) {
+                    if(!gameActive) return;
+                    const rect = canvas.getBoundingClientRect();
+                    const x = (e.clientX - rect.left) * (canvas.width / rect.width);
+                    const y = (e.clientY - rect.top) * (canvas.height / rect.height);
+                    
+                    for(let i = 0; i < 4; i++) {
+                        const btnX = 50 + i * 150;
+                        const btnY = canvas.height/2 + 40;
+                        
+                        if(x >= btnX && x <= btnX + 130 && y >= btnY && y <= btnY + 60) {
+                            if(options[i] === answer) {
+                                correctAnswers++;
+                                updateScore(50);
+                            }
+                            questionsAsked++;
+                            
+                            if(questionsAsked >= 5) {
+                                canvas.onclick = null;
+                                endGame(`You got ${correctAnswers}/5 correct!`);
+                            } else {
+                                setTimeout(newQuestion, 500);
+                            }
+                            return;
+                        }
+                    }
+                };
+            }
+            
+            newQuestion();
+        }
+
+        // Game 6: Dodge Master
+        function playDodgeMaster() {
+            const player = { x: 350, y: 350, size: 20 };
+            const obstacles = [];
+            let gameTime = 0;
+            const keys = {};
+            
+            document.getElementById('gameInfo').textContent = 'Dodge the falling obstacles!';
+            document.getElementById('controls').textContent = 'Use Arrow Keys or WASD';
+            
+            window.addEventListener('keydown', (e) => { keys[e.key] = true; });
+            window.addEventListener('keyup', (e) => { keys[e.key] = false; });
+            
+            function spawnObstacle() {
+                if(!gameActive) return;
+                obstacles.push({
+                    x: Math.random() * (canvas.width - 30),
+                    y: -30,
+                    size: 20 + Math.random() * 30,
+                    speed: 2 + Math.random() * 3,
+                    color: ['#ff006e', '#bf00ff', '#ff7700'][Math.floor(Math.random() * 3)]
+                });
+            }
+            
+            const spawnInterval = setInterval(spawnObstacle, 1000);
+            
+            function gameLoop() {
+                if(!gameActive) {
+                    clearInterval(spawnInterval);
+                    return;
+                }
+                
+                ctx.fillStyle = '#0a0014';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // Move player
+                if(keys['ArrowLeft'] || keys['a'] || keys['A']) player.x -= 5;
+                if(keys['ArrowRight'] || keys['d'] || keys['D']) player.x += 5;
+                if(keys['ArrowUp'] || keys['w'] || keys['W']) player.y -= 5;
+                if(keys['ArrowDown'] || keys['s'] || keys['S']) player.y += 5;
+                
+                player.x = Math.max(player.size, Math.min(canvas.width - player.size, player.x));
+                player.y = Math.max(player.size, Math.min(canvas.height - player.size, player.y));
+                
+                // Draw player
+                ctx.fillStyle = '#00f5ff';
+                ctx.beginPath();
+                ctx.arc(player.x, player.y, player.size, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Update and draw obstacles
+                for(let i = obstacles.length - 1; i >= 0; i--) {
+                    const obs = obstacles[i];
+                    obs.y += obs.speed;
+                    
+                    ctx.fillStyle = obs.color;
+                    ctx.fillRect(obs.x, obs.y, obs.size, obs.size);
+                    
+                    // Check collision
+                    const dist = Math.hypot(player.x - (obs.x + obs.size/2), player.y - (obs.y + obs.size/2));
+                    if(dist < player.size + obs.size/2) {
+                        gameActive = false;
+                        clearInterval(spawnInterval);
+                        endGame(`You survived ${gameTime.toFixed(1)}s!`);
+                        return;
+                    }
+                    
+                    if(obs.y > canvas.height) {
+                        obstacles.splice(i, 1);
+                        updateScore(10);
+                    }
+                }
+                
+                gameTime += 1/60;
+                document.getElementById('controls').textContent = `Time: ${gameTime.toFixed(1)}s`;
+                
+                requestAnimationFrame(gameLoop);
+            }
+            
+            gameLoop();
+        }
+
+        // Game 7: Click Storm
+        function playClickStorm() {
+            let clicks = 0;
+            let timeLeft = 10;
+            
+            ctx.font = '80px Orbitron';
+            ctx.fillStyle = '#ff006e';
+            ctx.textAlign = 'center';
+            ctx.fillText('CLICK!!!', canvas.width/2, canvas.height/2);
+            
+            document.getElementById('gameInfo').textContent = 'Click as fast as you can!';
+            document.getElementById('controls').textContent = `Time: ${timeLeft}s | Clicks: 0`;
+            
+            const timer = setInterval(() => {
+                if(!gameActive) {
+                    clearInterval(timer);
+                    return;
+                }
+                timeLeft--;
+                document.getElementById('controls').textContent = `Time: ${timeLeft}s | Clicks: ${clicks}`;
+                
+                if(timeLeft <= 0) {
+                    clearInterval(timer);
+                    const cps = (clicks / 10).toFixed(1);
+                    updateScore(clicks * 2);
+                    canvas.onclick = null;
+                    endGame(`${clicks} clicks! (${cps} per second)`);
+                }
+            }, 1000);
+            
+            canvas.onclick = function() {
+                if(!gameActive) return;
+                clicks++;
+                document.getElementById('controls').textContent = `Time: ${timeLeft}s | Clicks: ${clicks}`;
+                
+                // Visual feedback
+                const colors = ['#ff006e', '#00f5ff', '#39ff14', '#bf00ff'];
+                ctx.fillStyle = colors[Math.floor(Math.random() * colors.length)];
+                ctx.fillText('CLICK!!!', canvas.width/2, canvas.height/2);
+            };
+        }
+
+        // Simplified random games for the rest
+        function playRandomGame(type) {
+            const randomGames = {
+                pattern: () => simpleClickGame('Find the Different Pattern!', 'Click the odd one out!'),
+                draw: () => simpleTimedGame('Quick Draw Challenge!', 'Draw as fast as you can!'),
+                word: () => simpleClickGame('Type ARCADE fast!', 'Type as quickly as possible!'),
+                bubble: () => simpleClickGame('Pop All Bubbles!', 'Click every bubble!'),
+                snake: () => simpleTimedGame('Snake Race!', 'Collect items!'),
+                stack: () => simpleClickGame('Stack High!', 'Click to stack blocks!'),
+                maze: () => simpleTimedGame('Maze Runner!', 'Find the exit!'),
+                catch: () => simpleClickGame('Star Catcher!', 'Catch falling stars!'),
+                rhythm: () => simpleTimedGame('Rhythm Master!', 'Tap to the beat!'),
+                flood: () => simpleClickGame('Color Flood!', 'Fill the screen!'),
+                shoot: () => simpleClickGame('Target Practice!', 'Hit all targets!'),
+                spin: () => simpleTimedGame('Perfect Stop!', 'Stop at the right moment!'),
+                cards: () => simpleClickGame('Memory Cards!', 'Match all pairs!'),
+                line: () => simpleClickGame('Connect Dots!', 'Draw without crossing!'),
+                jump: () => simpleTimedGame('Gravity Jump!', 'Jump over obstacles!'),
+                coin: () => simpleClickGame('Coin Rush!', 'Collect them all!'),
+                target: () => simpleClickGame('Speed Target!', 'Click before they vanish!'),
+                letter: () => simpleClickGame('Alphabet Hunt!', 'Find letters in order!'),
+                shape: () => simpleClickGame('Shape Match!', 'Match the shape!'),
+                wave: () => simpleTimedGame('Wave Rider!', 'Stay on the wave!'),
+                pixel: () => simpleClickGame('Pixel Art!', 'Color the pixels!'),
+                sequence: () => simpleClickGame('Number Chain!', 'Complete sequence!'),
+                flash: () => simpleTimedGame('Flash Memory!', 'Remember what flashed!'),
+                arrow: () => simpleTimedGame('Arrow Dodge!', 'Avoid the arrows!'),
+                circle: () => simpleTimedGame('Circle Control!', 'Keep it in bounds!'),
+                power: () => simpleClickGame('Power Up!', 'Charge to maximum!'),
+                crystal: () => simpleClickGame('Crystal Quest!', 'Collect in order!'),
+                read: () => simpleClickGame('Speed Read!', 'Answer quickly!'),
+                laser: () => simpleTimedGame('Laser Maze!', 'Dodge the beams!'),
+                tile: () => simpleClickGame('Tile Flip!', 'Match all tiles!'),
+                quiz: () => simpleClickGame('Rapid Quiz!', 'Answer fast!'),
+                orbit: () => simpleTimedGame('Orbit Keep!', 'Maintain orbit!'),
+                switch: () => simpleClickGame('Switch It!', 'Hit the switch!'),
+                pulse: () => simpleTimedGame('Pulse Wave!', 'Ride the pulse!'),
+                gem: () => simpleClickGame('Gem Match!', 'Match 3 gems!'),
+                sort: () => simpleClickGame('Speed Sort!', 'Sort by size!'),
+                light: () => simpleTimedGame('Light Trail!', 'Follow the lights!'),
+                bounce: () => simpleTimedGame('Bounce Ball!', 'Keep bouncing!'),
+                gate: () => simpleClickGame('Gate Master!', 'Open gates!'),
+                chain: () => simpleClickGame('Chain Max!', 'Build a chain!'),
+                portal: () => simpleTimedGame('Portal Jump!', 'Through portals!'),
+                time: () => simpleTimedGame('Time Trial!', 'Beat the clock!'),
+                hex: () => simpleClickGame('Hex Match!', 'Find the hex!'),
+                runner: () => simpleTimedGame('Neon Run!', 'Run the track!'),
+                blast: () => simpleClickGame('Blast Away!', 'Clear obstacles!'),
+                mirror: () => simpleClickGame('Mirror Game!', 'Match the mirror!'),
+                check: () => simpleTimedGame('Pulse Check!', 'Hit the pulse!'),
+                grid: () => simpleClickGame('Grid Light!', 'Light it all!'),
+                quantum: () => simpleTimedGame('Quantum Leap!', 'Leap dimensions!'),
+                echo: () => simpleTimedGame('Echo Repeat!', 'Copy the echo!'),
+                fractal: () => simpleClickGame('Fractal Find!', 'Find the center!'),
+                prism: () => simpleClickGame('Prism Break!', 'Break the light!'),
+                volt: () => simpleTimedGame('Volt Dodge!', 'Dodge the voltage!'),
+                cyber: () => simpleTimedGame('Cyber Sprint!', 'Sprint fast!'),
+                data: () => simpleTimedGame('Data Stream!', 'Navigate data!'),
+                perfect: () => simpleClickGame('Pixel Perfect!', 'Place perfectly!'),
+                glitch: () => simpleClickGame('Glitch Find!', 'Spot glitches!'),
+                binary: () => simpleClickGame('Binary Fast!', 'Convert quickly!'),
+                synth: () => simpleTimedGame('Synth Wave!', 'Ride the wave!'),
+                nights: () => simpleClickGame('Neon Night!', 'Light it up!'),
+                turbo: () => simpleTimedGame('Turbo Time!', 'Perfect timing!'),
+                link: () => simpleClickGame('Laser Link!', 'Connect points!'),
+                hyper: () => simpleTimedGame('Hyper Space!', 'Navigate space!'),
+                retro: () => simpleTimedGame('Retro Rush!', 'Rush through!'),
+                atomic: () => simpleClickGame('Atomic Aim!', 'Hit particles!'),
+                plasma: () => simpleClickGame('Plasma Pop!', 'Pop bubbles!'),
+                circuit: () => simpleClickGame('Circuit Fix!', 'Complete it!'),
+                merge: () => simpleClickGame('Mega Merge!', 'Merge to win!'),
+                vector: () => simpleTimedGame('Vector Vault!', 'Vault over!'),
+                cosmic: () => simpleClickGame('Cosmic Click!', 'Click cosmos!'),
+                dash: () => simpleTimedGame('Digital Dash!', 'Dash quick!'),
+                photon: () => simpleTimedGame('Photon Race!', 'Light speed!'),
+                matrix: () => simpleTimedGame('Matrix Nav!', 'Navigate matrix!'),
+                frequency: () => simpleClickGame('Find Frequency!', 'Match freq!'),
+                knight: () => simpleTimedGame('Neon Knight!', 'Battle on!'),
+                code: () => simpleClickGame('Code Crack!', 'Crack it!'),
+                velocity: () => simpleTimedGame('Velocity!', 'Match speed!'),
+                spectrum: () => simpleClickGame('Spectrum!', 'Shift colors!'),
+                rave: () => simpleTimedGame('Rave React!', 'React fast!'),
+                ion: () => simpleTimedGame('Ion Storm!', 'Weather it!'),
+                morph: () => simpleClickGame('Mega Morph!', 'Morph fast!'),
+                flux: () => simpleTimedGame('Flux Fight!', 'Fight flux!'),
+                beam: () => simpleClickGame('Beam Bust!', 'Bust beams!'),
+                nova: () => simpleClickGame('Neon Nova!', 'Create nova!'),
+                rift: () => simpleTimedGame('Rapid Rift!', 'Jump rifts!'),
+                legion: () => simpleClickGame('Laser Legion!', 'Command!'),
+                cyclone: () => simpleTimedGame('Cyber Cyclone!', 'Survive it!'),
+                fury: () => simpleClickGame('Photon Fury!', 'Unleash!'),
+                nexus: () => simpleClickGame('Neon Nexus!', 'Connect all!'),
+                ultra: () => simpleTimedGame('Ultra Speed!', 'Go ultra!'),
+                quest: () => simpleClickGame('Quantum Quest!', 'Complete!')
+            };
+            
+            if(randomGames[type]) {
+                randomGames[type]();
+            } else {
+                simpleClickGame('Epic Challenge!', 'Click to win!');
+            }
+        }
+
+        function simpleClickGame(title, instruction) {
+            const colors = ['#ff006e', '#00f5ff', '#39ff14', '#bf00ff', '#ff7700'];
+            let clicked = 0;
+            const targetClicks = 5;
+            
+            document.getElementById('gameInfo').textContent = instruction;
+            document.getElementById('controls').textContent = `Clicks: 0/${targetClicks}`;
+            
+            function drawTargets() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                for(let i = 0; i < targetClicks; i++) {
+                    if(i < clicked) continue;
+                    const angle = (i / targetClicks) * Math.PI * 2;
+                    const x = canvas.width/2 + Math.cos(angle) * 150;
+                    const y = canvas.height/2 + Math.sin(angle) * 150;
+                    ctx.fillStyle = colors[i % colors.length];
+                    ctx.beginPath();
+                    ctx.arc(x, y, 40, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+            
+            drawTargets();
+            
+            canvas.onclick = function(e) {
+                if(!gameActive) return;
+                clicked++;
+                updateScore(30);
+                document.getElementById('controls').textContent = `Clicks: ${clicked}/${targetClicks}`;
+                drawTargets();
+                
+                if(clicked >= targetClicks) {
+                    canvas.onclick = null;
+                    endGame('Perfect! All targets hit!');
+                }
+            };
+        }
+
+        function simpleTimedGame(title, instruction) {
+            let timeLeft = 10;
+            let progress = 0;
+            
+            document.getElementById('gameInfo').textContent = instruction;
+            document.getElementById('controls').textContent = `Time: ${timeLeft}s`;
+            
+            const timer = setInterval(() => {
+                if(!gameActive) {
+                    clearInterval(timer);
+                    return;
+                }
+                
+                timeLeft--;
+                progress += 10;
+                
+                ctx.fillStyle = '#0a0014';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // Progress bar
+                ctx.fillStyle = '#39ff14';
+                ctx.fillRect(50, canvas.height/2 - 20, (canvas.width - 100) * (progress / 100), 40);
+                ctx.strokeStyle = '#00f5ff';
+                ctx.lineWidth = 3;
+                ctx.strokeRect(50, canvas.height/2 - 20, canvas.width - 100, 40);
+                
+                document.getElementById('controls').textContent = `Time: ${timeLeft}s`;
+                
+                if(timeLeft <= 0) {
+                    clearInterval(timer);
+                    updateScore(100);
+                    endGame('Time\'s up! Great job!');
+                }
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
